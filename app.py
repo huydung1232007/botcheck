@@ -368,7 +368,8 @@ with st.container(border=True):
             st.image(st.session_state['current_image'], width=200, caption="Đề bài đang chọn")
             if st.button("🗑️ Xóa ảnh", use_container_width=True):
                 st.session_state['current_image'] = None
-                st.rerun()with st.container(border=True):
+                st.rerun()
+with st.container(border=True):
     c1, c2 = st.columns([4, 1]) 
     with c1:
         st.markdown("#### 📝 Nội dung đề bài")
@@ -529,6 +530,7 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
