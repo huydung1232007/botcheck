@@ -327,8 +327,8 @@ st.markdown("<div class='gradient-text'>ULTIMATE CODE JUDGE</div>", unsafe_allow
 st.markdown("""
 <div class="ticker-wrap">
     <div class="ticker">
-        <div class="ticker-item">🚀 SYSTEM MODEL: Gemini 2.0 Flash Connected</div>
-        <div class="ticker-item">⚡ TIPS: Upload ảnh để AI tự đọc đề bài</div>
+        <div class="ticker-item">🚀 SYSTEM MODEL: dungGPT </div>
+        <div class="ticker-item">⚡ Yêu Linh Trần </div>
         <div class="ticker-item">🛡️ STATUS: Online</div>
         <div class="ticker-item">🤖 DEV: Nguyen Huy Dung</div>
         <div class="ticker-item">🔥 KEEP CODING - STAY FOCUSED</div>
@@ -487,4 +487,5 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
+
 
