@@ -237,11 +237,11 @@ def handle_solve_process():
     if not final_text and not cur_img:
         st.toast("Thiếu đề bài!", icon="⚠️"); return
 
-    with st.spinner("🧠 Đang tạo Logic Test..."):
+    with st.spinner("🧠 Đang nạp đề..."):
         nc = get_ai_test_logic(final_text if final_text else "", cur_img)
         if nc:
             st.session_state['python_logic'] = nc
-            st.session_state['logic_status'] = "✅ Đã nạp Logic"
+            st.session_state['logic_status'] = "✅ Đã hiểu đề"
             st.session_state['failed_cases'] = []
             st.session_state['reference_code'] = ""
             st.session_state['ai_fix_result'] = ""
@@ -271,8 +271,8 @@ with st.sidebar:
     
     # Chatbot Popover
     # Chatbot Popover (ĐÃ NÂNG CẤP NGỮ CẢNH)
-    with st.popover("💬 Trợ lý ảo (Click để chat)", use_container_width=True):
-        st.markdown("### 🤖 Trợ lý Lập trình")
+    with st.popover("💬 Trợ lý ảo ", use_container_width=True):
+        st.markdown("### dungGPT")
         
         # Hiển thị lịch sử chat
         messages_container = st.container(height=400)
@@ -487,3 +487,4 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
+
