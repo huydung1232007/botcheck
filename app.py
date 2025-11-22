@@ -346,7 +346,7 @@ with st.container(border=True):
     
     with c2:
         st.markdown("#### 🖼️ Ảnh")
-        tab_up, tab_paste = st.tabs(["📁 File",])
+         tab_up, tab_paste = st.tabs(["📁 File",])
         
         with tab_up:
             st.file_uploader("Chọn file", type=["png", "jpg"], label_visibility="collapsed", key="img_uploader")
@@ -530,6 +530,7 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
