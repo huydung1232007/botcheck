@@ -176,11 +176,40 @@ st.markdown("""
     /* TỔNG THỂ */
     .stApp { background-color: #050509; color: #e0e0e0; font-family: 'Inter', sans-serif; }
     
-    /* TITLE */
+    /* TITLE NEON */
     .neon-title {
-        font-family: 'Orbitron', sans-serif; font-size: 3.5rem; text-align: center;
-        background: linear-gradient(90deg, #ff00cc, #3333ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 20px rgba(255, 0, 204, 0.5); margin-bottom: 0px;
+        font-family: 'Orbitron', sans-serif; 
+        font-size: 4rem; 
+        text-align: center;
+        color: #fff; /* Màu chữ gốc phải là TRẮNG hoặc rất sáng */
+        
+        /* BÍ QUYẾT LÀ Ở ĐÂY 👇 */
+        text-shadow: 
+            0 0 5px #fff,      /* Lớp 1: Lõi sáng trắng (gần chữ nhất) */
+            0 0 10px #fff,     /* Lớp 2: Hào quang trắng nhẹ */
+            0 0 20px #ff00de,  /* Lớp 3: Bắt đầu tỏa màu NEON (Hồng) */
+            0 0 40px #ff00de,  /* Lớp 4: Tỏa rộng hơn */
+            0 0 80px #ff00de,  /* Lớp 5: Tỏa mờ xa */
+            0 0 100px #ff00de; /* Lớp 6: Ánh sáng môi trường */
+            
+        margin-bottom: 10px;
+        animation: flicker 1.5s infinite alternate; /* Thêm hiệu ứng nhấp nháy nếu thích */
+    }
+
+    /* Hiệu ứng đèn Neon bị chập chờn (Option) */
+    @keyframes flicker {
+        0%, 18%, 22%, 25%, 53%, 57%, 100% {
+            text-shadow: 
+                0 0 4px #fff,
+                0 0 10px #fff,
+                0 0 20px #ff00de,
+                0 0 40px #ff00de,
+                0 0 80px #ff00de;
+        }
+        20%, 24%, 55% {       
+            text-shadow: none; /* Tắt đèn */
+            opacity: 0.8;
+        }
     }
 
     /* --- CHỈNH SỬA TABS (TO & ĐẸP) --- */
@@ -529,5 +558,6 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
