@@ -341,44 +341,12 @@ with st.container(border=True):
     c1, c2 = st.columns([4, 1]) 
     with c1:
         st.markdown("#### 📝 Đề bài")
-        st.text_area("Input", height=250, placeholder="Nhập đề bài hoặc DÁN ẢNH bên phải ->", 
+        st.text_area("Input", height=250, placeholder="Nhập đề bài... ->", 
                      label_visibility="collapsed", key="problem_text_input")
     
     with c2:
         st.markdown("#### 🖼️ Ảnh")
-        tab_up, tab_paste = st.tabs(["📁 File",])
-        
-        with tab_up:
-            st.file_uploader("Chọn file", type=["png", "jpg"], label_visibility="collapsed", key="img_uploader")
-        
-        with tab_paste:
-            if HAS_PASTE_LIB:
-                try:
-                    main_pasted = paste(label="Click Dán", key="main_paste_btn")
-                    if main_pasted:
-                        st.session_state['current_image'] = Image.open(io.BytesIO(main_pasted))
-                        st.toast("Đã nhận ảnh!", icon="📋")
-                except Exception as e:
-                    st.warning("Trình duyệt chặn Paste.")
-                    st.caption("👉 Hãy dùng tab 'File' bên cạnh.")
-            else:
-                st.caption("⚠️ Chưa cài thư viện")
-
-        if st.session_state.get('current_image'):
-            st.image(st.session_state['current_image'], width=200, caption="Đề bài đang chọn")
-            if st.button("🗑️ Xóa ảnh", use_container_width=True):
-                st.session_state['current_image'] = None
-                st.rerun()
-with st.container(border=True):
-    c1, c2 = st.columns([4, 1]) 
-    with c1:
-        st.markdown("#### 📝 Nội dung đề bài")
-        st.text_area("Input", height=250, placeholder="Nhập đề bài hoặc Kéo thả ảnh bên phải ->", 
-                     label_visibility="collapsed", key="problem_text_input")
-    
-    with c2:
-        st.markdown("#### 🖼️ Ảnh đề bài")
-        # Chỉ còn nút Upload thuần túy
+        # CHỈ CÒN NÚT UPLOAD DUY NHẤT (KHÔNG TABS)
         st.file_uploader("Chọn file ảnh", type=["png", "jpg"], label_visibility="collapsed", key="img_uploader")
 
         if st.session_state.get('current_image'):
@@ -390,14 +358,13 @@ with st.container(border=True):
     st.write("") 
     b1, b2, b3 = st.columns([1, 1, 2])
     
-    # Nút Nạp đề (Đã fix lỗi mất chữ chạy)
     with b1:
-        if st.button("🚀 NẠP ĐỀ BÀI", type="primary", use_container_width=True):
+        if st.button("🚀 Gửi đề", type="primary", use_container_width=True):
             handle_solve_process()
             st.rerun()
             
     with b2:
-        if st.button("💡 Gợi ý Code", type="secondary", use_container_width=True):
+        if st.button("💡 Gợi ý", type="secondary", use_container_width=True):
             if st.session_state.get('problem_text_input') or st.session_state.get('current_image'):
                 st.session_state['reference_code'] = ""
                 st.session_state['show_solution_stream'] = True
@@ -530,6 +497,7 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
