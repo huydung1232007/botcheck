@@ -321,7 +321,7 @@ with st.sidebar:
 
 # --- 7. MAIN UI ---
 # Đổi class thành 'neon-title' cho khớp với CSS
-st.markdown('<div class="neon-title">BOT CODE NUMBER ONE HCMUT</div>', unsafe_allow_html=True)
+st.markdown('<div class="neon-title">BOT CODE HCMUT</div>', unsafe_allow_html=True)
 
 st.markdown("""
 <div class="ticker-wrap">
@@ -559,6 +559,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
