@@ -237,10 +237,16 @@ st.markdown("""
 
     /* EDITOR & INPUT */
     .stTextArea textarea {
-        font-family: 'JetBrains Mono', monospace !important; background-color: #0d1117 !important; color: #7ee787 !important;
-        border: 1px solid #30363d !important; border-radius: 8px;
+        font-family: 'Consolas', 'Monaco', monospace !important;
+        background-color: #ffffff !important;
+        color: #1f2937 !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 6px;
     }
-    .stTextArea textarea:focus { border-color: #ff00cc !important; box-shadow: 0 0 10px rgba(255, 0, 204, 0.3); }
+    .stTextArea textarea:focus {
+        border-color: #2563eb !important; /* Xanh dương Business */
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
     
     /* BUTTONS */
     div[data-testid="stButton"] > button { border-radius: 8px; font-weight: bold; border: none; transition: 0.3s; height: 45px; }
@@ -552,6 +558,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
