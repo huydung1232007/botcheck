@@ -176,23 +176,43 @@ st.markdown("""
     /* TỔNG THỂ */
     .stApp { background-color: #050509; color: #e0e0e0; font-family: 'Inter', sans-serif; }
     
-    /* TITLE NEON */
     .neon-title {
-        font-family: 'Orbitron', sans-serif; 
-        font-size: 3.5rem; 
+        font-family: 'Orbitron', sans-serif; /* Font điện tử */
+        font-size: 3.8rem; 
         font-weight: 900;
         text-align: center;
-        /* Màu chữ Gradient */
-        background: linear-gradient(90deg, #ff00cc, #3333ff);
+        text-transform: uppercase;
+        letter-spacing: 3px; /* Giãn chữ ra cho sang */
+        
+        /* Màu Gradient Tím - Xanh Neon */
+        background: linear-gradient(90deg, #ff00cc, #333399, #00ccff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        /* Đổ bóng phát sáng */
-        text-shadow: 0 0 20px rgba(255, 0, 204, 0.5);
         
-        /* QUAN TRỌNG: Căn lề để không bị dính */
-        margin-top: 0px;
-        margin-bottom: 20px; 
-        padding-bottom: 10px;
+        /* Đổ bóng phát sáng (Glow) */
+        filter: drop-shadow(0 0 5px rgba(255, 0, 204, 0.8)) 
+                drop-shadow(0 0 20px rgba(51, 51, 255, 0.6));
+        
+        margin-top: 10px;
+        margin-bottom: 30px; /* Đẩy xa thanh bên dưới ra */
+    }
+
+    /* --- 2. THANH TRẠNG THÁI (KHÔNG DÙNG ANIMATION TRƯỢT NỮA) --- */
+    .status-bar {
+        width: 100%;
+        background-color: #0d1117;
+        border: 1px solid #30363d;
+        border-left: 5px solid #238636; /* Viền xanh lá điểm nhấn */
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-family: 'JetBrains Mono', monospace;
+        color: #58a6ff; /* Màu xanh code */
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     /* --- CHỈNH SỬA TABS (TO & ĐẸP) --- */
     .stTabs [data-baseweb="tab-list"] {
@@ -541,6 +561,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
