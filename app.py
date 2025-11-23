@@ -253,11 +253,11 @@ def on_click_solve():
     nc = get_ai_test_logic(final_text if final_text else "", cur_img)
     if nc:
         st.session_state['python_logic'] = nc
-        st.session_state['logic_status'] = "✅ Đã nạp Logic"
+        st.session_state['logic_status'] = "✅"
         st.session_state['failed_cases'] = []
         st.session_state['reference_code'] = ""
         st.session_state['ai_fix_result'] = ""
-        st.toast("Sẵn sàng chiến đấu!", icon="🔥")
+        st.toast("Đã xong!", icon="🔥")
     else:
         st.toast("Lỗi AI Logic", icon="❌")
 # --- 6. SIDEBAR ---
@@ -600,6 +600,7 @@ if st.session_state.get('failed_cases'):
 if st.session_state.get('ai_fix_result'):
     with st.expander("✅ Kết quả sửa lỗi", expanded=True):
         st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
