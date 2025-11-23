@@ -206,8 +206,32 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     /* --- CHỈNH SỬA TABS (TO & ĐẸP) --- */
-    .stTabs [data-baseweb="tab"] { height: 40px; background-color: #18181b; border: 1px solid #27272a; flex-grow: 1; }
-    .stTabs [aria-selected="true"] { background-color: rgba(37, 99, 235, 0.1) !important; border: 1px solid #3b82f6 !important; color: #60a5fa !important; }
+    .stTabs {
+        margin-top: 30px; /* Đẩy xuống dưới */
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        display: flex;
+        width: 100%;
+        border-bottom: none;
+    }
+    .stTabs [data-baseweb="tab"] {
+        flex: 1; /* Tràn đều */
+        height: 65px; /* To cao */
+        background-color: #0d1117; 
+        border: 1px solid #30363d; 
+        border-radius: 8px 8px 0 0;
+        color: #8b949e;
+        font-weight: 800;
+        font-size: 1.2rem;
+        justify-content: center;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #238636 !important; 
+        color: white !important;
+        border-color: #238636 !important;
+        box-shadow: 0 -5px 15px rgba(35, 134, 54, 0.4);
+    }
     /* EDITOR & INPUT */
     .stTextArea textarea {
         font-family: 'Consolas', 'Monaco', monospace !important;
@@ -531,6 +555,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
