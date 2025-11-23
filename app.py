@@ -92,12 +92,26 @@ def get_ai_test_logic(problem, image=None):
     if not configure_ai(): return None
     try:
         model = genai.GenerativeModel('gemini-2.0-flash')
-        prompt = f"""Role: Senior QA. Task: Write Python test generator for: {problem}.
-        CRITICAL REQUIREMENTS:
-        1. You MUST define a function `def generate_input(): -> str`.
-        2. You MUST define a function `def solve_reference(s): -> str`.
-        3. STRICT: 50% Tiny Input, 50% Large Input.
-        Output: ONLY RAW PYTHON CODE. NO MARKDOWN."""
+        
+        # --- SỬA PROMPT: PHÂN PHỐI 30-35-35 VÀ KHỬ TRÙNG ---
+        prompt = f"""
+        Role: Senior QA. Task: Write Python test generator for: {problem}.
+        
+        CRITICAL LOGIC REQUIREMENTS:
+        1. Define `def generate_input(): -> str`:
+           - Use `global used_inputs` to store generated tests.
+           - Use a `while True` loop to ensure NO DUPLICATES (if input exists, regenerate).
+           - **DISTRIBUTION RULES:**
+             - Roll `r = random.random()`.
+             - If `r < 0.30` (30%): Generate in range [0, 1000].
+             - If `0.30 <= r < 0.65` (35%): Generate in range [1001, MAX/2].
+             - If `r >= 0.65` (35%): Generate in range [MAX/2, MAX].
+           - (Determine MAX based on problem, e.g., 10^6 or 10^9).
+        
+        2. Define `def solve_reference(s): -> str`.
+        
+        Output: ONLY RAW PYTHON CODE. NO MARKDOWN.
+        """
         res = model.generate_content([prompt, image] if image else [prompt])
         return res.text.replace("```python", "").replace("```", "").strip()
     except Exception as e: st.error(f"Lỗi Logic: {e}"); return None
@@ -467,3 +481,4 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
