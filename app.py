@@ -174,9 +174,20 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@900&family=Inter:wght@400;600&display=swap');
     
     /* TỔNG THỂ */
-    .stApp { background-color: #050509; color: #e0e0e0; font-family: 'Inter', sans-serif; }
-    
-    .neon-title { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 3.5rem; text-align: center; }
+    .stApp { 
+        background-color: #f3f4f6; /* Xám rất nhạt */
+        color: #1f2937; 
+        font-family: 'Inter', sans-serif; 
+    }    
+    .neon-title { 
+        font-family: 'Inter', sans-serif;
+        font-size: 2.8rem;
+        font-weight: 800;
+        text-align: center;
+        color: #111827; /* Đen than */
+        letter-spacing: -1px;
+        margin-bottom: 5px;
+    }
     /* --- 2. THANH TRẠNG THÁI (KHÔNG DÙNG ANIMATION TRƯỢT NỮA) --- */
     .status-bar {
         width: 100%;
@@ -541,6 +552,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
