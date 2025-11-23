@@ -142,9 +142,9 @@ try:
     if "GEMINI_KEYS" in st.secrets:
         API_KEYS = st.secrets["GEMINI_KEYS"]
     else:
-        API_KEYS = ["AIzaSyCmcoftGYbQIYo7itPnUyoJQscOSVHgvYI", "AIzaSyDFrOOQAyUFqENMyVoZ8gEeis_-9VYpxDw"]
+        API_KEYS = [""]
 except FileNotFoundError:
-    API_KEYS = ["AIzaSyCmcoftGYbQIYo7itPnUyoJQscOSVHgvYI", "AIzaSyDFrOOQAyUFqENMyVoZ8gEeis_-9VYpxDw"]
+    API_KEYS = [""]
 # ==============================================================================
 
 def get_random_key():
@@ -658,4 +658,5 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
+
 
