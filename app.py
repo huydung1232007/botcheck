@@ -168,20 +168,68 @@ def clear_history():
     if os.path.exists(HISTORY_FILE): os.remove(HISTORY_FILE)
     st.rerun()
 
-# --- 2. CSS MAGIC ---
+# --- 2. CSS MAGIC (GIAO DIỆN NEON & TABS TO) ---
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap');
-    .stApp { background-color: #09090b; color: #e4e4e7; font-family: 'Inter', sans-serif; }
-    .gradient-text { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 3.5rem; text-align: center; }
-    .stTextArea textarea { font-family: 'JetBrains Mono', monospace !important; background-color: #18181b !important; color: #a1a1aa !important; border: 1px solid #27272a; }
-    div[data-testid="stButton"] > button[kind="primary"] { background: linear-gradient(90deg, #2563eb, #3b82f6); color: white; border: none; font-weight: bold; }
-    .stTabs [data-baseweb="tab"] { height: 40px; background-color: #18181b; border: 1px solid #27272a; flex-grow: 1; }
-    .stTabs [aria-selected="true"] { background-color: rgba(37, 99, 235, 0.1) !important; border: 1px solid #3b82f6 !important; color: #60a5fa !important; }
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@900&family=Inter:wght@400;600&display=swap');
     
-    .ticker-wrap { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; overflow: hidden; margin-bottom: 20px; height: 40px; display: flex; align-items: center; box-shadow: 0 0 10px rgba(0, 210, 255, 0.1); }
+    /* TỔNG THỂ */
+    .stApp { background-color: #050509; color: #e0e0e0; font-family: 'Inter', sans-serif; }
+    
+    /* TITLE */
+    .neon-title {
+        font-family: 'Orbitron', sans-serif; font-size: 3.5rem; text-align: center;
+        background: linear-gradient(90deg, #ff00cc, #3333ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(255, 0, 204, 0.5); margin-bottom: 0px;
+    }
+
+    /* --- CHỈNH SỬA TABS (TO & ĐẸP) --- */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        display: flex;        /* Dùng Flexbox */
+        width: 100%;          /* Chiếm hết chiều ngang */
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        flex-grow: 1;         /* Tự động giãn đều nhau */
+        height: 60px;         /* Tăng chiều cao lên 60px (hoặc to hơn tùy thích) */
+        background-color: #1f2937; 
+        border-radius: 8px; 
+        color: #e5e7eb;
+        font-weight: bold;    /* Chữ đậm */
+        font-size: 18px;      /* Chữ to hơn */
+        white-space: pre-wrap; /* Cho phép xuống dòng nếu cần */
+        display: flex;        /* Căn giữa nội dung */
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #374151;
+    }
+
+    /* Màu khi ĐANG CHỌN (Active) */
+    .stTabs [aria-selected="true"] {
+        background-color: #238636 !important; 
+        color: white !important;
+        border: 1px solid #4ade80; /* Thêm viền sáng cho nút đang chọn */
+        box-shadow: 0 0 15px rgba(35, 134, 54, 0.6); /* Hiệu ứng phát sáng */
+    }
+
+    /* EDITOR & INPUT */
+    .stTextArea textarea {
+        font-family: 'JetBrains Mono', monospace !important; background-color: #0d1117 !important; color: #7ee787 !important;
+        border: 1px solid #30363d !important; border-radius: 8px;
+    }
+    .stTextArea textarea:focus { border-color: #ff00cc !important; box-shadow: 0 0 10px rgba(255, 0, 204, 0.3); }
+    
+    /* BUTTONS */
+    div[data-testid="stButton"] > button { border-radius: 8px; font-weight: bold; border: none; transition: 0.3s; height: 45px; }
+    div[data-testid="stButton"] > button[kind="primary"] { background: linear-gradient(45deg, #ff00cc, #333399); color: white; box-shadow: 0 4px 15px rgba(255, 0, 204, 0.4); }
+    div[data-testid="stButton"] > button[kind="primary"]:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(255, 0, 204, 0.6); }
+    div[data-testid="stButton"] > button[kind="secondary"] { background: linear-gradient(45deg, #00c6ff, #0072ff); color: black; }
+    
+    /* TICKER */
+    .ticker-wrap { width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 0, 204, 0.3); box-shadow: 0 0 10px rgba(255, 0, 204, 0.1); overflow: hidden; height: 30px; display: flex; align-items: center; margin-bottom: 20px; }
     .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker-scroll 30s linear infinite; }
-    .ticker-item { display: inline-block; padding: 0 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #00d2ff; text-shadow: 0 0 5px #00d2ff; }
+    .ticker-item { color: #00ffff; font-family: 'JetBrains Mono'; font-size: 0.8rem; padding: 0 2rem; }
     @keyframes ticker-scroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 </style>
 """, unsafe_allow_html=True)
@@ -481,4 +529,5 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
