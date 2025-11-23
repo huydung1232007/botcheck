@@ -428,6 +428,25 @@ if st.session_state.get('show_solution_stream'):
 if st.session_state['reference_code'] and not st.session_state.get('show_solution_stream'):
     with st.expander("💡 Tham Khảo ", expanded=False):
         st.code(st.session_state['reference_code'], language='cpp')
+# 👇👇👇 khung chat thêm code tham khảo 👇👇👇
+        st.markdown("---")
+        st.markdown("#### 🛠️ Tùy chỉnh Code mẫu")
+        c_refine_1, c_refine_2 = st.columns([3, 1])
+        
+        with c_refine_1:
+            user_refine = st.text_input("Nhập yêu cầu (VD: Dùng vòng lặp while...)", key="input_refine")
+            
+        with c_refine_2:
+            st.write("") # Căn lề cho nút bấm thẳng hàng với ô nhập
+            st.write("")
+            if st.button("✨ Viết lại ngay"):
+                if user_refine:
+                    st.session_state['refine_request'] = user_refine
+                    st.session_state['show_solution_stream'] = True
+                    st.rerun()
+                else:
+                    st.toast("Hãy nhập yêu cầu trước!", icon="⚠️")
+        # 👆👆👆 HẾT PHẦN CHÈN THÊM 👆👆👆
 
 # --- EDITOR & TABS ---
 st.write("###")
@@ -581,6 +600,7 @@ if st.session_state.get('failed_cases'):
 if st.session_state.get('ai_fix_result'):
     with st.expander("✅ Kết quả sửa lỗi", expanded=True):
         st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
