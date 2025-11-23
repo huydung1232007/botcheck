@@ -9,272 +9,172 @@ import random
 import math
 from PIL import Image
 import io
+import datetime
+import json
 
-# --- 1. CẤU HÌNH TRANG (PHẢI ĐỂ ĐẦU TIÊN) ---
+# --- 1. CẤU HÌNH TRANG ---
 st.set_page_config(
-    page_title="Ultimate Code Judge",
+    page_title="Nguyễn Huy Dũng",
     layout="wide",
     page_icon="⚡",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # ==============================================================================
-# 🔐 CẤU HÌNH HỆ THỐNG LOGIN 🔐
-# ==============================================================================
-# Bác sửa tài khoản / mật khẩu ở đây nhé
-USERS = {
-    "admin": st.secrets.get("PASS_ADMIN", "dòm cái con cặc"), 
-    "dungdev": st.secrets.get("PASS_DUNG", "dòm con mẹ m"),
-    "guest": st.secrets.get("PASS_GUEST", "phải có mẹo cơ")
-}
-USER_LIMITS = {
-    "admin": 9999, 
-    "dungdev": 50,
-    "guest": 5
-}
-
-def check_login():
-    st.markdown("""
-    <style>
-        .login-container {
-            margin-top: 100px;
-            padding: 40px;
-            background-color: #18181b;
-            border: 1px solid #27272a;
-            border-radius: 15px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-        .title {
-            font-size: 3em; font-weight: 900; margin-bottom: 20px;
-            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    c1, c2, c3 = st.columns([1, 2, 1])
-    with c2:
-        st.markdown('<div class="title">ULTIMATE CODE JUDGE</div>', unsafe_allow_html=True)
-        with st.container(border=True):
-            st.subheader("🔒 Đăng nhập hệ thống")
-            username = st.text_input("Tài khoản")
-            password = st.text_input("Mật khẩu", type="password")
-            
-            if st.button("🚀 Truy cập ngay", type="primary", use_container_width=True):
-                if username in USERS and USERS[username] == password:
-                    st.session_state['logged_in'] = True
-                    st.session_state['username'] = username
-                    st.toast("Đăng nhập thành công!", icon="✅")
-                    time.sleep(0.5)
-                    st.rerun()
-                else:
-                    st.error("Sai tài khoản hoặc mật khẩu!")
-
-if 'logged_in' not in st.session_state:
-    st.session_state['logged_in'] = False
-
-# NẾU CHƯA ĐĂNG NHẬP -> DỪNG CODE TẠI ĐÂY
-if not st.session_state['logged_in']:
-    check_login()
-    st.stop() # Dừng không chạy phần dưới
-
-# ==============================================================================
-# 👇👇👇 TỪ ĐÂY TRỞ XUỐNG LÀ CODE CHÍNH CỦA APP 👇👇👇
-# ==============================================================================
-
-# --- 2. CSS MAGIC (GIAO DIỆN) ---
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap');
-    .stApp { background-color: #09090b; color: #e4e4e7; font-family: 'Inter', sans-serif; }
-    .gradient-text {
-        background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        font-weight: 900; font-size: 3.5rem; text-align: center;
-        letter-spacing: -2px; margin-bottom: 10px;
-        text-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
-    }
-    .stTextArea textarea {
-        font-family: 'JetBrains Mono', monospace !important;
-        background-color: #18181b !important; color: #a1a1aa !important;
-        border: 1px solid #27272a !important; border-radius: 12px;
-    }
-    div[data-testid="stButton"] > button[kind="primary"] {
-        background: linear-gradient(90deg, #2563eb, #3b82f6);
-        color: white; border: none; height: 45px; font-weight: bold;
-    }
-    
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
-    .stTabs [data-baseweb="tab"] {
-        height: 40px; background-color: #18181b; border-radius: 8px;
-        border: 1px solid #27272a; color: #a1a1aa; flex-grow: 1;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: rgba(37, 99, 235, 0.1) !important;
-        border: 1px solid #3b82f6 !important; color: #60a5fa !important;
-    }
-    .ticker-wrap {
-        width: 100%; background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px;
-        overflow: hidden; margin-bottom: 20px; height: 40px;
-        display: flex; align-items: center;
-        box-shadow: 0 0 10px rgba(0, 210, 255, 0.1);
-    }
-    .ticker {
-        display: inline-block; white-space: nowrap; padding-left: 100%;
-        animation: ticker-scroll 30s linear infinite;
-    }
-    .ticker-item {
-        display: inline-block; padding: 0 2rem;
-        font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
-        color: #00d2ff; text-shadow: 0 0 5px #00d2ff;
-    }
-    @keyframes ticker-scroll {
-        0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); }
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# ==============================================================================
-# 👇👇👇 CẤU HÌNH API KEY 👇👇👇
+# 👇 CẤU HÌNH API KEY 👇
 try:
-    if "GEMINI_KEYS" in st.secrets:
-        API_KEYS = st.secrets["GEMINI_KEYS"]
-    else:
-        API_KEYS = [""]
-except FileNotFoundError:
-    API_KEYS = [""]
-# ==============================================================================
+    if "GEMINI_KEYS" in st.secrets: API_KEYS = st.secrets["GEMINI_KEYS"]
+    else: API_KEYS = [""]
+except: API_KEYS = [""]
 
-def get_random_key():
-    valid_keys = [k for k in API_KEYS if "PASTE" not in k and len(k) > 10]
-    if not valid_keys: return None
-    return random.choice(valid_keys)
+def get_random_key(): return random.choice([k for k in API_KEYS if "PASTE" not in k])
 
-CPP_FILENAME = "solution.cpp"
-EXE_FILENAME = "solution.exe" if os.name == 'nt' else "./solution"
+CPP_FILENAME = "solution.cpp"; EXE_FILENAME = "solution.exe" if os.name == 'nt' else "./solution"
+
+# --- 2. QUẢN LÝ LỊCH SỬ ---
+HISTORY_FILE = "history.json"
+
+def load_history_from_disk():
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, "r", encoding="utf-8") as f: return json.load(f)
+        except: return []
+    return []
+
+def save_history_to_disk(history_data):
+    try:
+        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(history_data, f, ensure_ascii=False, indent=4)
+    except: pass
 
 # --- 3. KHỞI TẠO BỘ NHỚ ---
-if 'python_logic' not in st.session_state:
-    st.session_state['python_logic'] = """used_inputs = set()
-def generate_input(): return "10 20"
-def solve_reference(s): return "30" """
-if 'logic_status' not in st.session_state: st.session_state['logic_status'] = "Chưa khởi tạo"
-if 'failed_cases' not in st.session_state: st.session_state['failed_cases'] = []
-if 'cpp_code_content' not in st.session_state:
-    st.session_state['cpp_code_content'] = """#include <bits/stdc++.h>
-using namespace std;
+if 'history' not in st.session_state:
+    st.session_state['history'] = load_history_from_disk()
 
-int main() {
-    ios_base::sync_with_stdio(false); 
-    cin.tie(NULL);
-    
-    // Code của bạn tại đây...
-    
-    return 0;
-}"""
-if 'reference_code' not in st.session_state: st.session_state['reference_code'] = ""
-if 'ai_fix_result' not in st.session_state: st.session_state['ai_fix_result'] = ""
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = [{"role": "assistant", "content": "Chào Sếp! Cần hỗ trợ gì về C++ không ạ?"}]
-if 'current_image' not in st.session_state: st.session_state['current_image'] = None
-if 'problem_text_input' not in st.session_state: st.session_state['problem_text_input'] = ""
-if 'chat_pasted_image' not in st.session_state: st.session_state['chat_pasted_image'] = None
-if 'refine_request' not in st.session_state: st.session_state['refine_request'] = ""
+defaults = {
+    'python_logic': """used_inputs = set()\ndef generate_input(): return "10 20"\ndef solve_reference(s): return "30" """,
+    'logic_status': "Chưa khởi tạo", 'failed_cases': [],
+    'cpp_code_content': """#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false); cin.tie(NULL);\n    // Code here\n    return 0;\n}""",
+    'reference_code': "", 'ai_fix_result': "",
+    'chat_history': [{"role": "assistant", "content": "Chào Sếp! Cần hỗ trợ gì về C++ không ạ?"}],
+    'current_image': None, 'problem_text_input': "", 'chat_pasted_image': None, 'refine_request': "",
+    'quiz_data': None
+}
+for k, v in defaults.items():
+    if k not in st.session_state: st.session_state[k] = v
 
-# --- 4. HÀM XỬ LÝ AI ---
+# --- 4. AI FUNCTIONS ---
 def configure_ai():
     key = get_random_key()
     if not key: return False
-    genai.configure(api_key=key)
-    return True
+    genai.configure(api_key=key); return True
 
-def stream_ai_response(prompt_text, image=None):
-    if not configure_ai(): 
-        yield "❌ Lỗi: Chưa nhập API Key."
-        return
+def stream_ai_response(prompt, image=None):
+    if not configure_ai(): yield "❌ Lỗi Key"; return
     try:
         model = genai.GenerativeModel('gemini-2.0-flash')
-        content = [prompt_text]
+        content = [prompt]; 
         if image: content.append(image)
         response = model.generate_content(content, stream=True)
-        for chunk in response:
+        for chunk in response: 
             if chunk.text: yield chunk.text
-    except Exception as e: yield f"❌ Lỗi kết nối AI: {str(e)}"
-
-def get_ai_test_logic(problem_text, image=None):
-    if not configure_ai(): 
-        st.error("❌ Chưa cấu hình API Key!")
-        return None
-    try:
-        model = genai.GenerativeModel('gemini-2.0-flash')
-        prompt = f"""
-        Role: Senior QA Engineer. Task: Write Python test generator for: {problem_text}.
-        STRICT DATA DISTRIBUTION RULE (50/50 SPLIT):
-        1. Roll a random chance `r = random.random()`.
-        2. **IF r < 0.5 (50% Chance)**: Generate input strictly in Range **[1, 9999]**.
-        3. **ELSE (50% Chance)**: Generate input strictly in Range **[10000, 1000000]**.
-        General Rules: Ensure `used_inputs` is global. Return strictly valid inputs.
-        FUNCTION SIGNATURES: `generate_input()` -> str, `solve_reference(input_str)` -> str.
-        OUTPUT: ONLY PYTHON CODE. NO MARKDOWN.
-        """
-        content = [prompt]
-        if image: content.append(image)
-        response = model.generate_content(content)
-        return response.text.replace("```python", "").replace("```", "").strip()
-    except Exception as e:
-        st.error(f"🔥 LỖI CHI TIẾT TỪ GOOGLE: {str(e)}")
-        return None
+    except Exception as e: yield f"❌ Lỗi AI: {str(e)}"
 
 def extract_text_from_image(image):
     if not configure_ai(): return None
     try:
         model = genai.GenerativeModel('gemini-2.0-flash')
-        prompt = "Extract all text from this image exactly. Output text only."
-        response = model.generate_content([prompt, image])
-        return response.text.strip()
+        res = model.generate_content(["Extract text exactly.", image])
+        return res.text.strip()
     except: return None
 
-# --- 5. CALLBACK HANDLERS ---
+def get_ai_test_logic(problem, image=None):
+    if not configure_ai(): return None
+    try:
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        prompt = f"""Role: Senior QA. Task: Write Python test generator for: {problem}.
+        CRITICAL REQUIREMENTS:
+        1. You MUST define a function `def generate_input(): -> str`.
+        2. You MUST define a function `def solve_reference(s): -> str`.
+        3. STRICT: 50% Tiny Input, 50% Large Input.
+        Output: ONLY RAW PYTHON CODE. NO MARKDOWN."""
+        res = model.generate_content([prompt, image] if image else [prompt])
+        return res.text.replace("```python", "").replace("```", "").strip()
+    except Exception as e: st.error(f"Lỗi Logic: {e}"); return None
+
+# --- 5. HANDLERS ---
 def on_click_solve():
-    uploaded_file = st.session_state.get('img_uploader')
-    if uploaded_file:
-        img = Image.open(uploaded_file)
-        st.session_state['current_image'] = img
-        extracted_text = extract_text_from_image(img)
-        if extracted_text and "Error" not in extracted_text:
-            st.session_state['problem_text_input'] = extracted_text
-            st.toast("Đã đọc xong đề bài!", icon="📝")
+    if st.session_state.get('img_uploader'):
+        st.session_state['current_image'] = Image.open(st.session_state['img_uploader'])
     
-    final_text = st.session_state.get('problem_text_input', "")
-    cur_img = st.session_state.get('current_image')
-
-    if not final_text and not cur_img:
-        st.toast("Thiếu đề bài (Text/Ảnh)!", icon="⚠️")
-        return
-
-    nc = get_ai_test_logic(final_text if final_text else "", cur_img)
+    if st.session_state.get('current_image'):
+        with st.spinner("👁️ Đang đọc ảnh..."):
+            txt = extract_text_from_image(st.session_state['current_image'])
+            if txt: st.session_state['problem_text_input'] = txt; st.toast("Đã đọc đề!", icon="📝")
+    
+    txt = st.session_state.get('problem_text_input', "")
+    img = st.session_state.get('current_image')
+    
+    if not txt and not img: st.toast("Thiếu đề!", icon="⚠️"); return
+    
+    nc = get_ai_test_logic(txt, img)
     if nc:
         st.session_state['python_logic'] = nc
-        st.session_state['logic_status'] = "✅ Đã nạp Logic"
+        st.session_state['logic_status'] = "✅ Đã hiểu đề"
         st.session_state['failed_cases'] = []
         st.session_state['reference_code'] = ""
         st.session_state['ai_fix_result'] = ""
-        st.toast("Sẵn sàng chiến đấu!", icon="🔥")
-    else:
-        st.toast("Lỗi AI Logic", icon="❌")
+        st.toast("Đã xong!", icon="🔥")
+    else: st.toast("Lỗi AI", icon="❌")
+
+def save_to_history():
+    if not st.session_state['problem_text_input'] and not st.session_state['cpp_code_content']:
+        st.toast("Không có gì để lưu!", icon="⚠️"); return
+    timestamp = datetime.datetime.now().strftime("%d/%m %H:%M")
+    entry = {
+        "time": timestamp,
+        "problem": st.session_state['problem_text_input'],
+        "code": st.session_state['cpp_code_content'],
+        "logic": st.session_state['python_logic'],
+        "status": st.session_state['logic_status']
+    }
+    st.session_state['history'].insert(0, entry)
+    save_history_to_disk(st.session_state['history'])
+    st.toast("Đã lưu !", icon="💾")
+
+def load_from_history(entry):
+    st.session_state['problem_text_input'] = entry['problem']
+    st.session_state['cpp_code_content'] = entry['code']
+    st.session_state['python_logic'] = entry['logic']
+    st.session_state['logic_status'] = entry.get('status', "Đã tải lại")
+    st.toast("Đã tải lại bài cũ!", icon="📂")
+
+def clear_history():
+    st.session_state['history'] = []
+    if os.path.exists(HISTORY_FILE): os.remove(HISTORY_FILE)
+    st.rerun()
+
+# --- 2. CSS MAGIC ---
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap');
+    .stApp { background-color: #09090b; color: #e4e4e7; font-family: 'Inter', sans-serif; }
+    .gradient-text { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 3.5rem; text-align: center; }
+    .stTextArea textarea { font-family: 'JetBrains Mono', monospace !important; background-color: #18181b !important; color: #a1a1aa !important; border: 1px solid #27272a; }
+    div[data-testid="stButton"] > button[kind="primary"] { background: linear-gradient(90deg, #2563eb, #3b82f6); color: white; border: none; font-weight: bold; }
+    .stTabs [data-baseweb="tab"] { height: 40px; background-color: #18181b; border: 1px solid #27272a; flex-grow: 1; }
+    .stTabs [aria-selected="true"] { background-color: rgba(37, 99, 235, 0.1) !important; border: 1px solid #3b82f6 !important; color: #60a5fa !important; }
+    
+    .ticker-wrap { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; overflow: hidden; margin-bottom: 20px; height: 40px; display: flex; align-items: center; box-shadow: 0 0 10px rgba(0, 210, 255, 0.1); }
+    .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker-scroll 30s linear infinite; }
+    .ticker-item { display: inline-block; padding: 0 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #00d2ff; text-shadow: 0 0 5px #00d2ff; }
+    @keyframes ticker-scroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+</style>
+""", unsafe_allow_html=True)
 
 # --- 6. SIDEBAR ---
 with st.sidebar:
-    # --- THÊM NÚT ĐĂNG XUẤT ---
-    st.write(f"👤 Xin chào, **{st.session_state.get('username', 'User')}**!")
-    if st.button("🚪 Đăng xuất", use_container_width=True):
-        st.session_state['logged_in'] = False
-        st.rerun()
-        
-    st.markdown("---")
-    st.markdown("### ⚙️ Cấu hình")
+    st.markdown("### ⚙️ Settings")
     with st.container(border=True):
         num_tests = st.slider("Số lượng Test:", 10, 500, 50)
         time_limit = st.slider("Giới hạn thời gian (s):", 0.1, 3.0, 1.0)
@@ -285,378 +185,285 @@ with st.sidebar:
         if "sẵn" in status or "Logic" in status: st.success(status, icon="✅")
         else: st.info(status, icon="ℹ️")
         active_keys = len([k for k in API_KEYS if "PASTE" not in k and len(k) > 10])
-        st.caption(f"🔑 Phím: **{active_keys}** | ⚡ Model: **Gemini 2.0**")
-
-    st.write("---") 
+        st.caption(f"🔑 API KEYS: **{active_keys}** | ⚡ Model: **dungGPT**")
     
-    # CHATBOT
-    with st.popover("💬 Trợ lý ảo (Click để chat)", use_container_width=True):
-        st.markdown("### 🤖 Trợ lý Lập trình")
-        messages_container = st.container(height=300)
-        with messages_container:
-            for msg in st.session_state.chat_history:
-                st.chat_message(msg["role"]).write(msg["content"])
+    st.write("---")
+    
+    # HISTORY
+    with st.expander("📂 Lịch sử ", expanded=False):
+        c_h1, c_h2 = st.columns([3, 1])
+        with c_h1:
+            if st.button("💾 ", use_container_width=True): save_to_history()
+        with c_h2:
+            if st.button("🗑️", help="Xóa hết", use_container_width=True): clear_history()
+            
         st.write("---")
+        if not st.session_state['history']:
+            st.caption("Chưa có lịch sử.")
+        else:
+            for i, item in enumerate(st.session_state['history']):
+                label = f"📅 {item['time']} - {item['problem'][:15]}..." if item['problem'] else f"📅 {item['time']} - (No Name)"
+                if st.button(label, key=f"hist_{i}", use_container_width=True):
+                    load_from_history(item); st.rerun()
+    
+    st.write("---")
+    # CHATBOT (DÙNG ST.WRITE_STREAM)
+    with st.popover("💬 dungGPT", use_container_width=True):
+        msgs = st.container(height=300)
+        for m in st.session_state.chat_history: msgs.chat_message(m["role"]).write(m["content"])
         
-        up_chat = st.file_uploader("📂 Tải ảnh lên (để hỏi AI)", type=["png","jpg"], key="chat_up")
-        if up_chat: st.session_state['chat_pasted_image'] = Image.open(up_chat)
+        up = st.file_uploader("Tải ảnh", type=["png","jpg"], key="chat_up", label_visibility="collapsed")
+        if up: st.session_state['chat_pasted_image'] = Image.open(up)
+        if st.session_state['chat_pasted_image']: 
+            st.image(st.session_state['chat_pasted_image'], width=100)
+            if st.button("Xóa ảnh"): st.session_state['chat_pasted_image']=None; st.rerun()
 
-        if st.session_state['chat_pasted_image']:
-            st.image(st.session_state['chat_pasted_image'], width=150, caption="Ảnh đính kèm")
-            if st.button("❌ Xóa ảnh", key="del_chat_img"): 
-                st.session_state['chat_pasted_image'] = None; st.rerun()
+        if p := st.chat_input("Hỏi AI..."):
+            st.session_state.chat_history.append({"role":"user","content":p})
+            msgs.chat_message("user").write(p)
+            ctx = f"Context: Prob: {st.session_state['problem_text_input']}. Code: {st.session_state['cpp_code_content']}. VNese."
+            with msgs.chat_message("assistant"):
+                # FIX LỖI: Dùng write_stream thay vì loop
+                full = st.write_stream(stream_ai_response(ctx + f" User: {p}", st.session_state['chat_pasted_image']))
+            st.session_state.chat_history.append({"role":"assistant","content":full})
+            st.session_state['chat_pasted_image']=None; st.rerun()
 
-        if prompt := st.chat_input("Hỏi AI...", key="chat_popover_input"):
-            st.session_state.chat_history.append({"role": "user", "content": prompt})
-            with messages_container:
-                st.chat_message("user").write(prompt)
-                if st.session_state['chat_pasted_image']: st.image(st.session_state['chat_pasted_image'], width=200)
-            
-            curr_prob = st.session_state.get('problem_text_input', "")
-            curr_code = st.session_state.get('cpp_code_content', "")
-            curr_ref = st.session_state.get('reference_code', "")
-            full_prompt = f"Role: C++ Tutor. Context: Problem: {curr_prob}. Code: {curr_code}. Ref Code: {curr_ref}. User: {prompt}. Answer in VN."
-            
-            with messages_container:
-                with st.chat_message("assistant"):
-                    res = st.empty(); full = ""
-                    for ch in stream_ai_response(full_prompt, image=st.session_state['chat_pasted_image']):
-                        full += ch; res.write(full)
-            st.session_state.chat_history.append({"role": "assistant", "content": full})
-            st.session_state['chat_pasted_image'] = None; st.rerun()
-
-# --- 7. GIAO DIỆN CHÍNH ---
-st.markdown("<div class='gradient-text'>ULTIMATE CODE JUDGE</div>", unsafe_allow_html=True)
+# --- 7. MAIN UI ---
+st.markdown("<div class='gradient-text'> BOT CODE SỐ 1 HCMUT </div>", unsafe_allow_html=True)
 
 st.markdown("""
 <div class="ticker-wrap">
     <div class="ticker">
-        <div class="ticker-item">🚀 SYSTEM READY: Gemini 2.0 Flash Connected</div>
-        <div class="ticker-item">⚡ TIPS: Kéo thả ảnh vào khung Upload để nạp đề nhanh</div>
-        <div class="ticker-item">🛡️ STATUS: Auto Judge Online</div>
+        <div class="ticker-item">🚀 AI: dungGPT Plus </div>
+        <div class="ticker-item">⚡ HCMUT </div>
+        <div class="ticker-item">🛡️ STATUS: Online</div>
         <div class="ticker-item">🤖 DEV: Nguyen Huy Dung</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# === KHUNG NHẬP LIỆU CHÍNH ===
 with st.container(border=True):
-    c1, c2 = st.columns([4, 1]) 
-    with c1:
-        st.markdown("#### 📝 Nội dung đề bài")
-        st.text_area("Input", height=250, placeholder="Nhập đề bài hoặc Kéo thả ảnh bên phải ->", 
-                     label_visibility="collapsed", key="problem_text_input")
-    
-    with c2:
-        st.markdown("#### 🖼️ Ảnh đề bài")
-        st.file_uploader("Chọn file ảnh", type=["png", "jpg"], label_visibility="collapsed", key="img_uploader")
-
-        if st.session_state.get('current_image'):
-            st.image(st.session_state['current_image'], width=200, caption="Đề bài đang chọn")
-            if st.button("🗑️ Xóa ảnh", use_container_width=True):
-                st.session_state['current_image'] = None
-                st.rerun()
-
-    st.write("") 
-    b1, b2, b3 = st.columns([1, 1, 2])
-    
-    with b1:
-        st.button("🚀 NẠP ĐỀ BÀI", type="primary", use_container_width=True, on_click=on_click_solve)
+    c1, c2 = st.columns([4, 1])
+    with c1: st.markdown("#### 📝 Đề bài"); st.text_area("In", height=200, placeholder="Nhập đề...", key="problem_text_input", label_visibility="collapsed")
+    with c2: 
+        st.markdown("#### 🖼️ Ảnh"); st.file_uploader("Up", type=["png","jpg"], key="img_uploader", label_visibility="collapsed")
+        if st.session_state.get('current_image'): 
+            st.image(st.session_state['current_image'], width=150)
+            if st.button("Xóa"): st.session_state['current_image']=None; st.rerun()
             
-    with b2:
-        if st.button("💡 Gợi ý Code", type="secondary", use_container_width=True):
-            if st.session_state.get('problem_text_input') or st.session_state.get('current_image'):
-                st.session_state['reference_code'] = ""
-                st.session_state['show_solution_stream'] = True
-                st.rerun()
-            else: st.toast("Chưa có đề!", icon="⚠️")
-    with b3:
-        status = st.session_state.get('logic_status', 'Chưa khởi tạo')
-        st.markdown(f"<div style='text-align: right; padding-top: 10px; opacity: 0.7;'>Status: <b>{status}</b></div>", unsafe_allow_html=True)
+    b1, b2, b3 = st.columns([1, 1, 2])
+    with b1: st.button("🚀 SEND ", type="primary", on_click=on_click_solve, use_container_width=True)
+    with b2: 
+        if st.button("💡 Gợi ý", type="secondary", use_container_width=True):
+            st.session_state['show_solution_stream']=True; st.rerun()
+    with b3: st.markdown(f"<div style='text-align:right;padding-top:10px;opacity:0.7;'><b>{st.session_state['logic_status']}</b></div>", unsafe_allow_html=True)
 
-# --- STREAMING SOLUTION ---
+# STREAMING SOLUTION (FIX LỖI DÙNG WRITE_STREAM)
 if st.session_state.get('show_solution_stream'):
-    st.info("💡 **AI đang viết code mẫu...**")
-    sol_text = st.session_state.get('problem_text_input', "")
-    sol_img = st.session_state.get('current_image')
+    st.info("💡 AI đang code...")
+    req = st.session_state.get('refine_request', "")
+    prompt = f"Role: CP Expert. Task: REWRITE solution. Req: {req}. Rules: O2, VNese comments." if req else f"Role: CP Expert. Solve: {st.session_state['problem_text_input']}. Rules: O2, VNese comments."
     
-    refine_req = st.session_state.get('refine_request', "")
-    
-    if refine_req:
-        prompt_sol = f"""
-        Role: CP Expert (Vietnamese). 
-        Task: REWRITE the solution for this C++ problem.
-        Problem: {sol_text}
-        USER REQUIREMENT: {refine_req}
-        Rules: 
-        1. Optimize O2. 
-        2. Add comments in VIETNAMESE. 
-        3. Output only Code.
-        """
-    else:
-        prompt_sol = f"Role: CP Expert. Solve C++: {sol_text}. Optimize O2. Comments in VIETNAMESE. Code only."
-    
-    container = st.empty(); full_res = ""
-    for chunk in stream_ai_response(prompt_sol, image=sol_img):
-        full_res += chunk
-        container.code(full_res.replace("```cpp","").replace("```",""), language='cpp')
-    
-    st.session_state['reference_code'] = full_res.replace("```cpp","").replace("```","").strip()
-    st.session_state['show_solution_stream'] = False
-    st.session_state['refine_request'] = ""
-    st.rerun()
+    # FIX LỖI: Dùng write_stream
+    full = st.write_stream(stream_ai_response(prompt, st.session_state.get('current_image')))
+    st.session_state['reference_code'] = full.replace("```cpp","").replace("```","").strip()
+    st.session_state['show_solution_stream'] = False; st.session_state['refine_request']=""; st.rerun()
 
 if st.session_state['reference_code'] and not st.session_state.get('show_solution_stream'):
-    with st.expander("💡 Code Tham Khảo (Click để xem)", expanded=False):
+    with st.expander("💡 Tham Khảo", expanded=False):
         st.code(st.session_state['reference_code'], language='cpp')
-        
-        st.markdown("---")
-        st.markdown("#### 🛠️ Tùy chỉnh Code mẫu")
-        c_refine_1, c_refine_2 = st.columns([3, 1])
-        with c_refine_1:
-            user_refine = st.text_input("Nhập yêu cầu (VD: Dùng vòng lặp while, Dùng đệ quy...)", key="input_refine")
-        with c_refine_2:
-            st.write("")
-            st.write("")
-            if st.button("✨ Viết lại ngay"):
-                if user_refine:
-                    st.session_state['refine_request'] = user_refine
-                    st.session_state['show_solution_stream'] = True
-                    st.rerun()
-                else:
-                    st.toast("Hãy nhập yêu cầu trước!", icon="⚠️")
+        c_rf1, c_rf2 = st.columns([3,1])
+        with c_rf1: u_refine = st.text_input("Yêu cầu AI", key="ir")
+        with c_rf2: 
+            st.write(""); st.write("")
+            if st.button("✨ Sửa "): 
+                st.session_state['refine_request']=u_refine; st.session_state['show_solution_stream']=True; st.rerun()
 
-# --- EDITOR & TABS ---
 st.write("###")
 st.markdown("### 💻 Code Editor")
-st.text_area("Editor", height=450, key="cpp_code_content", label_visibility="collapsed")
+st.text_area("Ed", height=400, key="cpp_code_content", label_visibility="collapsed")
 
-tab1, tab2, tab3, tab4 = st.tabs(["🚀 CHẤM TỰ ĐỘNG", "🧪 TEST TÙY CHỈNH", "📊 PHÂN TÍCH", "🧩 SƠ ĐỒ & REVIEW"])
+# --- TABS ---
+t1, t2, t3, t4 = st.tabs(["🚀 TỰ ĐỘNG", "🧪 TEST", "🧩 CÔNG CỤ", "🎮 GAME"])
 
-# === TAB 1: AUTO JUDGE ===
-with tab1:
-    if st.button("🔥 CHẤM BÀI NGAY", type="primary", use_container_width=True):
-        st.session_state['ai_fix_result'] = ""
+# T1: AUTO JUDGE
+with t1:
+    if st.button("🔥 SUBMIT", type="primary", use_container_width=True):
+        if os.path.exists(EXE_FILENAME):
+            try: os.remove(EXE_FILENAME)
+            except: pass 
+
         with open(CPP_FILENAME, "w", encoding="utf-8") as f: f.write(st.session_state['cpp_code_content'])
-        
         cmd = ["g++", "-O2", CPP_FILENAME, "-o", "solution"]
-        with st.status("⚙️ Đang biên dịch & chạy test...", expanded=True) as status:
+        with st.status("⚙️ Đang chạy trình biên dịch & tests ...", expanded=True) as s:
             ret = subprocess.run(cmd, capture_output=True, text=True)
-            if ret.returncode != 0:
-                status.update(label="Lỗi biên dịch!", state="error")
-                st.error(ret.stderr)
+            if ret.returncode != 0: s.update(label="Lỗi biên dịch!", state="error"); st.error(ret.stderr)
             else:
-                exec_env = {"random": random, "math": math, "sys": sys, "used_inputs": set()}
+                env = {"random": random, "math": math, "sys": sys, "used_inputs": set()}
                 try:
-                    exec(st.session_state['python_logic'], exec_env)
-                    gen_in = exec_env['generate_input']; solve_ref = exec_env['solve_reference']
-                    exec_env['used_inputs'] = set()
-                    
-                    results = []; correct = 0; failed_log = []
-                    p_bar = st.progress(0); start_t = time.time()
+                    exec(st.session_state['python_logic'], env)
+                    if 'generate_input' not in env or 'solve_reference' not in env:
+                        s.update(label="Lỗi AI!", state="error")
+                        st.error("⚠️ AI sinh logic bị thiếu hàm. Bấm '🚀 SEND' lại!")
+                        st.stop()
+
+                    gen = env['generate_input']; solv = env['solve_reference']; env['used_inputs'] = set()
+                    res = []; corr = 0; fails = []
+                    pb = st.progress(0)
+                    start_t = time.time()
                     
                     for i in range(num_tests):
-                        inp = str(gen_in()); exp = str(solve_ref(inp)).strip()
+                        inp = str(gen()); exp = str(solv(inp)).strip()
                         try:
                             p = subprocess.Popen([EXE_FILENAME], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-                            out, err = p.communicate(input=inp, timeout=time_limit)
-                            got = out.strip()
-                            stat = "✅" if got == exp else "❌"
-                            if stat == "✅": correct += 1
-                            else: failed_log.append(f"Case {i+1}: In='{inp}' | Exp='{exp}' | Got='{got}'")
-                        except subprocess.TimeoutExpired: 
-                            p.kill(); stat = "⏳"; failed_log.append(f"Case {i+1}: TLE")
-                        except Exception as e: stat = "⚠️"
-                        
-                        results.append({"Test": i+1, "Input": inp, "Exp": exp, "Got": got, "Status": stat})
-                        if i % 5 == 0: p_bar.progress((i+1)/num_tests)
+                            o, e = p.communicate(input=inp, timeout=time_limit); got = o.strip()
+                            stt = "✅" if got==exp else "❌"
+                            if stt=="✅": corr+=1
+                            else: fails.append(f"Case {i+1}: In='{inp}' | Exp='{exp}' | Got='{got}'")
+                        except: p.kill(); stt="⏳"; fails.append(f"Case {i+1}: TLE")
+                        res.append({"Test":i+1, "In":inp, "Exp":exp, "Got":got, "Stt":stt})
+                        pb.progress((i+1)/num_tests)
                     
-                    p_bar.progress(100)
-                    status.update(label="Hoàn tất!", state="complete", expanded=False)
-                    st.session_state['failed_cases'] = failed_log
+                    end_t = time.time()
+                    s.update(label="Xong!", state="complete", expanded=False)
+                    st.session_state['failed_cases'] = fails
                     
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Kết quả", f"{correct}/{num_tests}", delta_color="normal")
-                    acc = correct/num_tests*100
-                    m2.metric("Độ chính xác", f"{acc:.1f}%", delta=f"{acc-100:.1f}%" if acc<100 else "Perfect")
-                    m3.metric("Thời gian", f"{time.time()-start_t:.2f}s")
+                    m1.metric("Kết quả", f"{corr}/{num_tests}")
+                    acc = corr/num_tests*100 if num_tests > 0 else 0
+                    m2.metric("Độ chính xác", f"{acc:.1f}%")
+                    m3.metric("Thời gian", f"{end_t - start_t:.2f}s")
                     
-                    if correct == num_tests: st.balloons(); st.success("TUYỆT VỜI! FULL AC! 🎉")
-                    else: st.error(f"Sai {num_tests-correct} test. Kiểm tra lại nhé!")
+                    if corr==num_tests: st.balloons()
+                    st.dataframe(pd.DataFrame(res), use_container_width=True, height=300)
+                except Exception as e: st.error(f"Lỗi Logic: {e}")
 
-                    df = pd.DataFrame(results)
-                    st.dataframe(df, use_container_width=True, height=400, hide_index=True)
-                except Exception as e: st.error(f"Lỗi Logic Python: {e}")
-
-# === TAB 2: CUSTOM TEST ===
-with tab2:
-    c_in, c_out = st.columns(2)
-    with c_in: cust_in = st.text_area("Input Tùy chỉnh", height=150)
-    with c_out: 
-        st.write("Output:"); cust_out = st.empty()
-    
-    if st.button("Kiểm tra thử"):
+# T2: CUSTOM TEST
+with t2:
+    st.markdown("#### 🧪 Test Tùy chỉnh")
+    cust_in = st.text_area("Nhập Input:", height=150)
+    if st.button("⚡ RUN ", type="primary", use_container_width=True):
         with open(CPP_FILENAME, "w", encoding="utf-8") as f: f.write(st.session_state['cpp_code_content'])
-        subprocess.run(["g++", "-O2", CPP_FILENAME, "-o", "solution"])
-        try:
-            p = subprocess.Popen([EXE_FILENAME], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            out, err = p.communicate(input=cust_in, timeout=time_limit)
-            cust_out.code(out)
-        except Exception as e: cust_out.error(e)
+        res_build = subprocess.run(["g++", "-O2", CPP_FILENAME, "-o", "solution"], capture_output=True, text=True)
+        if res_build.returncode != 0: st.error("Lỗi biên dịch!"); st.code(res_build.stderr)
+        else:
+            try:
+                p = subprocess.Popen([EXE_FILENAME], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                out, err = p.communicate(input=cust_in, timeout=time_limit)
+                st.success("Output:"); st.code(out)
+            except Exception as e: st.error(f"Lỗi: {e}")
 
-# === TAB 3: PHÂN TÍCH (VIỆT HÓA) ===
-with tab3:
-    if st.button("🔍 Phân tích Độ phức tạp"):
-        prompt = f"Analyze Big-O complexity briefly in VIETNAMESE:\n{st.session_state['cpp_code_content']}"
-        cont = st.empty(); full=""
-        for ch in stream_ai_response(prompt): full+=ch; cont.markdown(full)
-
-# === TAB 4: CÔNG CỤ MỞ RỘNG (VIỆT HÓA) ===
-with tab4:
+# T3: CÔNG CỤ (FIX LỖI STREAM)
+with t3:
     st.write("###")
-    c_t4_1, c_t4_2, c_t4_3 = st.columns(3)
-    
-    # --- 1. VẼ SƠ ĐỒ ---
-    with c_t4_1:
-        st.markdown("#### 🗺️ Sơ đồ luồng")
-        btn_chart = st.button("🎨 Vẽ Flowchart", use_container_width=True)
+    with st.container(border=True):
+        c3_1, c3_2, c3_3 = st.columns(3)
+        with c3_1: btn_chart = st.button("🎨 Flowchart", use_container_width=True)
+        with c3_2: btn_review = st.button("🧐 Review Code", use_container_width=True)
+        with c3_3: 
+            lang_dest = st.selectbox("Đích:", ["Python", "Java", "JS", "Go"], label_visibility="collapsed")
+            btn_convert = st.button(f"⚡ Convert ", use_container_width=True)
 
-    # --- 2. REVIEW CODE ---
-    with c_t4_2:
-        st.markdown("#### ⚔️ Review Code")
-        btn_review = st.button("🧐 Chấm điểm", use_container_width=True)
-
-    # --- 3. CHUYỂN ĐỔI NGÔN NGỮ ---
-    with c_t4_3:
-        st.markdown("#### 🔄 Chuyển Ngôn ngữ")
-        target_lang = st.selectbox("Đích:", ["Python", "Java", "JavaScript", "Go"], label_visibility="collapsed")
-        btn_convert = st.button(f"⚡ Chuyển sang {target_lang}", use_container_width=True)
-
-    # 1. XỬ LÝ VẼ SƠ ĐỒ
     if btn_chart:
         st.markdown("---")
-        if not st.session_state['cpp_code_content']:
-            st.warning("Thiếu code!")
+        if not st.session_state['cpp_code_content']: st.warning("Thiếu code!")
         else:
-            with st.spinner("🎨 Đang vẽ sơ đồ..."):
-                prompt_chart = f"""
-                Generate Graphviz DOT code for this C++ code.
-                Labels must be concise.
-                Code:
-                {st.session_state['cpp_code_content']}
-                Output only DOT code inside ```dot block.
-                """
-                dot_code = ""
-                for chunk in stream_ai_response(prompt_chart): dot_code += chunk
-                try: 
-                    st.graphviz_chart(dot_code.replace("```dot", "").replace("```", "").strip())
-                except: st.error("Lỗi hiển thị.")
+            with st.status("🎨 Đang vẽ sơ đồ...", expanded=True):
+                p = f"Generate Graphviz DOT code for this C++ code:\n{st.session_state['cpp_code_content']}\nOutput only DOT code inside ```dot block."
+                d = ""; 
+                for c in stream_ai_response(p): d+=c
+                try: st.graphviz_chart(d.replace("```dot","").replace("```","").strip())
+                except: st.error("Lỗi hiển thị sơ đồ.")
 
-    # 2. XỬ LÝ REVIEW CODE (VIỆT HÓA)
     if btn_review:
         st.markdown("---")
-        if not st.session_state['cpp_code_content']:
-            st.warning("Thiếu code!")
+        if not st.session_state['cpp_code_content']: st.warning("Thiếu code!")
         else:
-            with st.spinner("🧐 Đang soi code..."):
-                prompt_rev = f"""
-                Role: Senior C++ Developer.
-                Task: Review this code strictly in VIETNAMESE (Tiếng Việt).
-                
-                Code:
-                {st.session_state['cpp_code_content']}
-                
-                Output Format:
-                1. **Điểm số:** .../100
-                2. **Nhận xét:** (Ưu/Nhược điểm).
-                3. **Vấn đề:** (Lỗi tiềm ẩn).
-                4. **Code Tối ưu:** (Viết lại code sạch đẹp hơn).
+            with st.status("🧐 Đang soi code...", expanded=True):
+                curr_prob = st.session_state.get('problem_text_input', "Chưa có đề bài")
+                p = f"""
+                Role: Senior Competitive Programming Coach.
+                Task: Review this C++ code based on the PROBLEM.
+                CONTEXT:
+                1. PROBLEM: {curr_prob}
+                2. CODE: {st.session_state['cpp_code_content']}
+                STRICT INSTRUCTIONS:
+                - Review in VIETNAMESE.
+                - Focus on Algorithm Complexity (Big-O) and Corner Cases.
+                - NO redundant small talk.
+                OUTPUT FORMAT:
+                ## 📊 ĐIỂM: [Score]/100
+                ### ✅ Ưu điểm
+                ...
+                ### ⚠️ Vấn đề
+                ...
+                ### 🚀 Code Tối ưu
+                ```cpp
+                ...
+                ```
                 """
-                cont_rev = st.container(border=True)
-                review_placeholder = cont_rev.empty()
-                full_rev = ""
-                for chunk in stream_ai_response(prompt_rev):
-                    full_rev += chunk; review_placeholder.markdown(full_rev)
+                # FIX LỖI: Dùng write_stream
+                st.write_stream(stream_ai_response(p))
 
-    # 3. XỬ LÝ CHUYỂN ĐỔI NGÔN NGỮ (VIỆT HÓA)
     if btn_convert:
         st.markdown("---")
-        if not st.session_state['cpp_code_content']:
-            st.warning("Thiếu code nguồn!")
+        if not st.session_state['cpp_code_content']: st.warning("Thiếu code!")
         else:
-            st.subheader(f"🚀 Kết quả chuyển đổi sang {target_lang}")
-            with st.spinner(f"Đang dịch sang {target_lang}..."):
-                prompt_conv = f"""
-                Role: Polyglot Programmer.
-                Task: Convert this C++ code to {target_lang}.
-                REQUIREMENTS:
-                1. Keep the same logic.
-                2. Add comments explaining the changes in VIETNAMESE (Tiếng Việt).
-                3. Output ONLY the code block.
-                Code:
-                {st.session_state['cpp_code_content']}
-                """
-                cont_conv = st.container()
-                full_conv = ""
-                for chunk in stream_ai_response(prompt_conv):
-                    full_conv += chunk
-                    clean_view = full_conv.replace(f"```{target_lang.lower()}", "").replace("```", "")
-                    cont_conv.code(clean_view, language=target_lang.lower())
+            with st.status(f"⚡ Đang dịch sang {lang_dest}...", expanded=True):
+                p = f"Convert C++ to {lang_dest}. VN comments.\n{st.session_state['cpp_code_content']}"
+                # FIX LỖI: Dùng write_stream
+                st.write_stream(stream_ai_response(p))
 
-# --- 8. AI FIXER (VIỆT HÓA) ---
-if st.session_state.get('failed_cases'):
-    st.markdown("---")
-    st.subheader("🆘 Trợ lý Debug (AI Fixer)")
-    
-    with st.container(border=True):
-        user_hint = st.text_input("💡 Gợi ý cho AI (nếu bạn nghi ngờ lỗi ở đâu):", 
-                                  placeholder="Ví dụ: Sai ở vòng lặp for, hoặc tràn số...")
-        
-        detail_mode = st.checkbox("✅ Giải thích chi tiết nguyên nhân", value=True)
-
-        if st.button("🤖 Phân tích & Sửa Code", type="primary", use_container_width=True):
-            curr_txt = st.session_state.get('problem_text_input', "")
-            prob = curr_txt if curr_txt else "Check context image"
-            
-            instruction = "Explain the bug briefly in VIETNAMESE."
-            if detail_mode:
-                instruction = """
-                Analyze deeply. 
-                1. Identify the EXACT cause of the error.
-                2. Point out the specific line numbers.
-                3. Explain WHY your fix works.
-                4. Provide the FULL corrected code.
-                Strictly in VIETNAMESE.
-                """
-            
-            hint_prompt = f"USER HINT: {user_hint}" if user_hint else ""
-
-            prompt_fix = f"""
-            Role: Expert C++ Debugger.
-            CONTEXT:
-            - PROBLEM: {prob}
-            - CURRENT CODE:
-            {st.session_state['cpp_code_content']}
-            - FAILED TEST CASES:
-            {' '.join(st.session_state['failed_cases'][:3])}
-            {hint_prompt}
-            TASK: {instruction}
-            OUTPUT: Markdown Vietnamese. Code in cpp block.
+# T4: GAME
+with t4:
+    st.markdown("#### 🎮 Đố vui Code (Quiz)")
+    if st.button("🎲 Tạo câu hỏi mới", use_container_width=True):
+        with st.spinner("Thinking..."):
+            prompt_quiz = f"""
+            Role: Quiz Master.
+            Task: Generate 1 multiple-choice question about this C++ code.
+            Code: {st.session_state['cpp_code_content']}
+            Output STRICT JSON format:
+            {{
+                "question": "Question in VN",
+                "options": ["A. 1", "B. 2", "C. 3", "D. 4"],
+                "answer": "A",
+                "explanation": "Explanation in VN"
+            }}
+            NO MARKDOWN.
             """
-            
-            fix_container = st.empty()
-            full_fix = ""
-            img = st.session_state.get('current_image')
-            
-            for ch in stream_ai_response(prompt_fix, image=img):
-                full_fix += ch
-                fix_container.markdown(full_fix)
-                
-            st.session_state['ai_fix_result'] = full_fix
+            try:
+                model = genai.GenerativeModel('gemini-2.0-flash')
+                res = model.generate_content(prompt_quiz)
+                clean_json = res.text.replace("```json", "").replace("```", "").strip()
+                st.session_state['quiz_data'] = json.loads(clean_json)
+            except: st.error("Lỗi tạo câu hỏi")
 
-if st.session_state.get('ai_fix_result'):
-    with st.container(border=True):
-        st.info("Kết quả sửa lỗi:")
-        st.markdown(st.session_state['ai_fix_result'])
+    if st.session_state.get('quiz_data'):
+        q_data = st.session_state['quiz_data']
+        st.info(f"❓ **{q_data['question']}**")
+        user_choice = st.radio("Chọn đáp án:", q_data['options'], key="quiz_radio")
+        if st.button("Kiểm tra"):
+            if user_choice.split(".")[0].strip() == q_data['answer'].strip():
+                st.success("🎉 Chính xác!"); st.balloons()
+            else: st.error(f"❌ Sai! Đáp án là **{q_data['answer']}**")
+            st.warning(f"💡 {q_data['explanation']}")
 
-
+# --- AI FIXER (FIX LỖI STREAM) ---
+if st.session_state.get('failed_cases'):
+    st.markdown("---"); st.subheader("🆘 FIX ")
+    hint = st.text_input("Gợi ý:")
+    if st.button(" SỬA ĐI ", type="primary"):
+        p = f"""
+        Role: Expert C++ Debugger.
+        Context:
+        - Problem: {st.session_state['problem_text_input']}
+        - Code: {st.session_state['cpp_code_content']}
+        - Error Log: {st.session_state['failed_cases'][:3]}
+        - User Hint: {hint}
+        Task: Explain the error STRICTLY in VIETNAMESE and provide fix.
+        """
+        # FIX LỖI: Dùng write_stream
+        f = st.write_stream(stream_ai_response(p))
+        st.session_state['ai_fix_result'] = f
+    if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
