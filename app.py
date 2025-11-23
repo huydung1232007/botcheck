@@ -418,7 +418,7 @@ if st.session_state.get('show_solution_stream'):
         full_res += chunk
         container.code(full_res.replace("```cpp","").replace("```",""), language='cpp')
     
-   st.session_state['reference_code'] = full_res.replace("```cpp","").replace("```","").strip()
+    st.session_state['reference_code'] = full_res.replace("```cpp","").replace("```","").strip()
     st.session_state['show_solution_stream'] = False
     
     # 👇 THÊM DÒNG NÀY ĐỂ RESET YÊU CẦU SAU KHI VIẾT XONG 👇
@@ -581,6 +581,7 @@ if st.session_state.get('failed_cases'):
 if st.session_state.get('ai_fix_result'):
     with st.expander("✅ Kết quả sửa lỗi", expanded=True):
         st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
