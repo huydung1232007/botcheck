@@ -14,7 +14,7 @@ import json
 
 # --- 1. CẤU HÌNH TRANG ---
 st.set_page_config(
-    page_title="Nguyễn Huy Dũng",
+    page_title="Ultimate Code Judge",
     layout="wide",
     page_icon="⚡",
     initial_sidebar_state="expanded"
@@ -92,26 +92,12 @@ def get_ai_test_logic(problem, image=None):
     if not configure_ai(): return None
     try:
         model = genai.GenerativeModel('gemini-2.0-flash')
-        
-        # --- SỬA PROMPT: PHÂN PHỐI 30-35-35 VÀ KHỬ TRÙNG ---
-        prompt = f"""
-        Role: Senior QA. Task: Write Python test generator for: {problem}.
-        
-        CRITICAL LOGIC REQUIREMENTS:
-        1. Define `def generate_input(): -> str`:
-           - Use `global used_inputs` to store generated tests.
-           - Use a `while True` loop to ensure NO DUPLICATES (if input exists, regenerate).
-           - **DISTRIBUTION RULES:**
-             - Roll `r = random.random()`.
-             - If `r < 0.30` (30%): Generate in range [0, 1000].
-             - If `0.30 <= r < 0.65` (35%): Generate in range [1001, MAX/2].
-             - If `r >= 0.65` (35%): Generate in range [MAX/2, MAX].
-           - (Determine MAX based on problem, e.g., 10^6 or 10^9).
-        
-        2. Define `def solve_reference(s): -> str`.
-        
-        Output: ONLY RAW PYTHON CODE. NO MARKDOWN.
-        """
+        prompt = f"""Role: Senior QA. Task: Write Python test generator for: {problem}.
+        CRITICAL REQUIREMENTS:
+        1. You MUST define a function `def generate_input(): -> str`.
+        2. You MUST define a function `def solve_reference(s): -> str`.
+        3. STRICT: 50% Tiny Input, 50% Large Input.
+        Output: ONLY RAW PYTHON CODE. NO MARKDOWN."""
         res = model.generate_content([prompt, image] if image else [prompt])
         return res.text.replace("```python", "").replace("```", "").strip()
     except Exception as e: st.error(f"Lỗi Logic: {e}"); return None
@@ -134,11 +120,11 @@ def on_click_solve():
     nc = get_ai_test_logic(txt, img)
     if nc:
         st.session_state['python_logic'] = nc
-        st.session_state['logic_status'] = "✅ Đã hiểu đề"
+        st.session_state['logic_status'] = "✅ Đã nạp Logic"
         st.session_state['failed_cases'] = []
         st.session_state['reference_code'] = ""
         st.session_state['ai_fix_result'] = ""
-        st.toast("Đã xong!", icon="🔥")
+        st.toast("Sẵn sàng!", icon="🔥")
     else: st.toast("Lỗi AI", icon="❌")
 
 def save_to_history():
@@ -154,7 +140,7 @@ def save_to_history():
     }
     st.session_state['history'].insert(0, entry)
     save_history_to_disk(st.session_state['history'])
-    st.toast("Đã lưu !", icon="💾")
+    st.toast("Đã lưu vĩnh viễn!", icon="💾")
 
 def load_from_history(entry):
     st.session_state['problem_text_input'] = entry['problem']
@@ -168,90 +154,17 @@ def clear_history():
     if os.path.exists(HISTORY_FILE): os.remove(HISTORY_FILE)
     st.rerun()
 
-# --- 2. CSS MAGIC (GIAO DIỆN NEON & TABS TO) ---
+# --- 2. CSS MAGIC ---
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@900&family=Inter:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap');
+    .stApp { background-color: #09090b; color: #e4e4e7; font-family: 'Inter', sans-serif; }
+    .gradient-text { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 3.5rem; text-align: center; }
+    .stTextArea textarea { font-family: 'JetBrains Mono', monospace !important; background-color: #18181b !important; color: #a1a1aa !important; border: 1px solid #27272a; }
+    div[data-testid="stButton"] > button[kind="primary"] { background: linear-gradient(90deg, #2563eb, #3b82f6); color: white; border: none; font-weight: bold; }
+    .stTabs [data-baseweb="tab"] { height: 40px; background-color: #18181b; border: 1px solid #27272a; flex-grow: 1; }
+    .stTabs [aria-selected="true"] { background-color: rgba(37, 99, 235, 0.1) !important; border: 1px solid #3b82f6 !important; color: #60a5fa !important; }
     
-    /* TỔNG THỂ */
-    .stApp { 
-        background-color: #f3f4f6; /* Xám rất nhạt */
-        color: #1f2937; 
-        font-family: 'Inter', sans-serif; 
-    }    
-    .neon-title { 
-        font-family: 'Inter', sans-serif;
-        font-size: 2.8rem;
-        font-weight: 800;
-        text-align: center;
-        color: #111827; /* Đen than */
-        letter-spacing: -1px;
-        margin-bottom: 5px;
-    }
-    /* --- 2. THANH TRẠNG THÁI (KHÔNG DÙNG ANIMATION TRƯỢT NỮA) --- */
-    .status-bar {
-        width: 100%;
-        background-color: #0d1117;
-        border: 1px solid #30363d;
-        border-left: 5px solid #238636; /* Viền xanh lá điểm nhấn */
-        padding: 10px 15px;
-        border-radius: 5px;
-        font-family: 'JetBrains Mono', monospace;
-        color: #58a6ff; /* Màu xanh code */
-        font-size: 0.9rem;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-    /* --- CHỈNH SỬA TABS (TO & ĐẸP) --- */
-    .stTabs {
-        margin-top: 30px; /* Đẩy xuống dưới */
-    }
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
-        display: flex;
-        width: 100%;
-        border-bottom: none;
-    }
-    .stTabs [data-baseweb="tab"] {
-        flex: 1; /* Tràn đều */
-        height: 65px; /* To cao */
-        background-color: #0d1117; 
-        border: 1px solid #30363d; 
-        border-radius: 8px 8px 0 0;
-        color: #8b949e;
-        font-weight: 800;
-        font-size: 1.2rem;
-        justify-content: center;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #238636 !important; 
-        color: white !important;
-        border-color: #238636 !important;
-        box-shadow: 0 -5px 15px rgba(35, 134, 54, 0.4);
-    }
-    /* EDITOR & INPUT */
-    .stTextArea textarea {
-        font-family: 'Consolas', 'Monaco', monospace !important;
-        background-color: #ffffff !important;
-        color: #1f2937 !important;
-        border: 1px solid #d1d5db !important;
-        border-radius: 6px;
-    }
-    .stTextArea textarea:focus {
-        border-color: #2563eb !important; /* Xanh dương Business */
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-    
-    /* BUTTONS */
-    div[data-testid="stButton"] > button { border-radius: 8px; font-weight: bold; border: none; transition: 0.3s; height: 45px; }
-    div[data-testid="stButton"] > button[kind="primary"] { background: linear-gradient(45deg, #ff00cc, #333399); color: white; box-shadow: 0 4px 15px rgba(255, 0, 204, 0.4); }
-    div[data-testid="stButton"] > button[kind="primary"]:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(255, 0, 204, 0.6); }
-    div[data-testid="stButton"] > button[kind="secondary"] { background: linear-gradient(45deg, #00c6ff, #0072ff); color: black; }
-    
-    /* TICKER */
     .ticker-wrap { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; overflow: hidden; margin-bottom: 20px; height: 40px; display: flex; align-items: center; box-shadow: 0 0 10px rgba(0, 210, 255, 0.1); }
     .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker-scroll 30s linear infinite; }
     .ticker-item { display: inline-block; padding: 0 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #00d2ff; text-shadow: 0 0 5px #00d2ff; }
@@ -261,7 +174,7 @@ st.markdown("""
 
 # --- 6. SIDEBAR ---
 with st.sidebar:
-    st.markdown("### ⚙️ Settings")
+    st.markdown("### ⚙️ Cấu hình")
     with st.container(border=True):
         num_tests = st.slider("Số lượng Test:", 10, 500, 50)
         time_limit = st.slider("Giới hạn thời gian (s):", 0.1, 3.0, 1.0)
@@ -272,15 +185,15 @@ with st.sidebar:
         if "sẵn" in status or "Logic" in status: st.success(status, icon="✅")
         else: st.info(status, icon="ℹ️")
         active_keys = len([k for k in API_KEYS if "PASTE" not in k and len(k) > 10])
-        st.caption(f"🔑 API KEYS: **{active_keys}** | ⚡ Model: **dungGPT**")
+        st.caption(f"🔑 Phím: **{active_keys}** | ⚡ Model: **Gemini 2.0**")
     
     st.write("---")
     
     # HISTORY
-    with st.expander("📂 Lịch sử ", expanded=False):
+    with st.expander("📂 Lịch sử Bài làm", expanded=False):
         c_h1, c_h2 = st.columns([3, 1])
         with c_h1:
-            if st.button("💾 ", use_container_width=True): save_to_history()
+            if st.button("💾 Lưu bài", use_container_width=True): save_to_history()
         with c_h2:
             if st.button("🗑️", help="Xóa hết", use_container_width=True): clear_history()
             
@@ -295,7 +208,7 @@ with st.sidebar:
     
     st.write("---")
     # CHATBOT (DÙNG ST.WRITE_STREAM)
-    with st.popover("💬 dungGPT", use_container_width=True):
+    with st.popover("💬 Trợ lý ảo", use_container_width=True):
         msgs = st.container(height=300)
         for m in st.session_state.chat_history: msgs.chat_message(m["role"]).write(m["content"])
         
@@ -316,15 +229,14 @@ with st.sidebar:
             st.session_state['chat_pasted_image']=None; st.rerun()
 
 # --- 7. MAIN UI ---
-# Đổi class thành 'neon-title' cho khớp với CSS
-st.markdown('<div class="neon-title">BOT CODE HCMUT</div>', unsafe_allow_html=True)
+st.markdown("<div class='gradient-text'>ULTIMATE CODE JUDGE</div>", unsafe_allow_html=True)
 
 st.markdown("""
 <div class="ticker-wrap">
     <div class="ticker">
-        <div class="ticker-item">🚀 AI: dungGPT Plus </div>
-        <div class="ticker-item">⚡ HCMUT </div>
-        <div class="ticker-item">🛡️ STATUS: Online</div>
+        <div class="ticker-item">🚀 SYSTEM READY: Gemini 2.0 Flash Connected</div>
+        <div class="ticker-item">⚡ TIPS: Kéo thả ảnh vào khung Upload để nạp đề nhanh</div>
+        <div class="ticker-item">🛡️ STATUS: Auto Judge Online</div>
         <div class="ticker-item">🤖 DEV: Nguyen Huy Dung</div>
     </div>
 </div>
@@ -340,7 +252,7 @@ with st.container(border=True):
             if st.button("Xóa"): st.session_state['current_image']=None; st.rerun()
             
     b1, b2, b3 = st.columns([1, 1, 2])
-    with b1: st.button("🚀 SEND ", type="primary", on_click=on_click_solve, use_container_width=True)
+    with b1: st.button("🚀 NẠP ĐỀ", type="primary", on_click=on_click_solve, use_container_width=True)
     with b2: 
         if st.button("💡 Gợi ý", type="secondary", use_container_width=True):
             st.session_state['show_solution_stream']=True; st.rerun()
@@ -348,7 +260,7 @@ with st.container(border=True):
 
 # STREAMING SOLUTION (FIX LỖI DÙNG WRITE_STREAM)
 if st.session_state.get('show_solution_stream'):
-    st.info("💡 AI đang code...")
+    st.info("💡 AI đang viết code...")
     req = st.session_state.get('refine_request', "")
     prompt = f"Role: CP Expert. Task: REWRITE solution. Req: {req}. Rules: O2, VNese comments." if req else f"Role: CP Expert. Solve: {st.session_state['problem_text_input']}. Rules: O2, VNese comments."
     
@@ -358,13 +270,13 @@ if st.session_state.get('show_solution_stream'):
     st.session_state['show_solution_stream'] = False; st.session_state['refine_request']=""; st.rerun()
 
 if st.session_state['reference_code'] and not st.session_state.get('show_solution_stream'):
-    with st.expander("💡 Tham Khảo", expanded=False):
+    with st.expander("💡 Code Tham Khảo", expanded=False):
         st.code(st.session_state['reference_code'], language='cpp')
         c_rf1, c_rf2 = st.columns([3,1])
-        with c_rf1: u_refine = st.text_input("Yêu cầu AI", key="ir")
+        with c_rf1: u_refine = st.text_input("Yêu cầu sửa (VD: Dùng đệ quy)", key="ir")
         with c_rf2: 
             st.write(""); st.write("")
-            if st.button("✨ Sửa "): 
+            if st.button("✨ Sửa lại"): 
                 st.session_state['refine_request']=u_refine; st.session_state['show_solution_stream']=True; st.rerun()
 
 st.write("###")
@@ -372,18 +284,18 @@ st.markdown("### 💻 Code Editor")
 st.text_area("Ed", height=400, key="cpp_code_content", label_visibility="collapsed")
 
 # --- TABS ---
-t1, t2, t3, t4 = st.tabs(["🚀 TỰ ĐỘNG", "🧪 TEST", "🧩 CÔNG CỤ", "🎮 GAME"])
+t1, t2, t3, t4 = st.tabs(["🚀 CHẤM", "🧪 TEST", "🧩 CÔNG CỤ", "🎮 GAME"])
 
 # T1: AUTO JUDGE
 with t1:
-    if st.button("🔥 SUBMIT", type="primary", use_container_width=True):
+    if st.button("🔥 CHẤM NGAY", type="primary", use_container_width=True):
         if os.path.exists(EXE_FILENAME):
             try: os.remove(EXE_FILENAME)
             except: pass 
 
         with open(CPP_FILENAME, "w", encoding="utf-8") as f: f.write(st.session_state['cpp_code_content'])
         cmd = ["g++", "-O2", CPP_FILENAME, "-o", "solution"]
-        with st.status("⚙️ Đang chạy trình biên dịch & tests ...", expanded=True) as s:
+        with st.status("⚙️ Đang chấm...", expanded=True) as s:
             ret = subprocess.run(cmd, capture_output=True, text=True)
             if ret.returncode != 0: s.update(label="Lỗi biên dịch!", state="error"); st.error(ret.stderr)
             else:
@@ -392,7 +304,7 @@ with t1:
                     exec(st.session_state['python_logic'], env)
                     if 'generate_input' not in env or 'solve_reference' not in env:
                         s.update(label="Lỗi AI!", state="error")
-                        st.error("⚠️ AI sinh logic bị thiếu hàm. Bấm '🚀 SEND' lại!")
+                        st.error("⚠️ AI sinh logic bị thiếu hàm. Bấm '🚀 NẠP ĐỀ' lại!")
                         st.stop()
 
                     gen = env['generate_input']; solv = env['solve_reference']; env['used_inputs'] = set()
@@ -430,7 +342,7 @@ with t1:
 with t2:
     st.markdown("#### 🧪 Test Tùy chỉnh")
     cust_in = st.text_area("Nhập Input:", height=150)
-    if st.button("⚡ RUN ", type="primary", use_container_width=True):
+    if st.button("⚡ Chạy thử", type="primary", use_container_width=True):
         with open(CPP_FILENAME, "w", encoding="utf-8") as f: f.write(st.session_state['cpp_code_content'])
         res_build = subprocess.run(["g++", "-O2", CPP_FILENAME, "-o", "solution"], capture_output=True, text=True)
         if res_build.returncode != 0: st.error("Lỗi biên dịch!"); st.code(res_build.stderr)
@@ -446,11 +358,11 @@ with t3:
     st.write("###")
     with st.container(border=True):
         c3_1, c3_2, c3_3 = st.columns(3)
-        with c3_1: btn_chart = st.button("🎨 Flowchart", use_container_width=True)
+        with c3_1: btn_chart = st.button("🎨 Vẽ Flowchart", use_container_width=True)
         with c3_2: btn_review = st.button("🧐 Review Code", use_container_width=True)
         with c3_3: 
             lang_dest = st.selectbox("Đích:", ["Python", "Java", "JS", "Go"], label_visibility="collapsed")
-            btn_convert = st.button(f"⚡ Convert ", use_container_width=True)
+            btn_convert = st.button(f"⚡ Dịch -> {lang_dest}", use_container_width=True)
 
     if btn_chart:
         st.markdown("---")
@@ -539,9 +451,9 @@ with t4:
 
 # --- AI FIXER (FIX LỖI STREAM) ---
 if st.session_state.get('failed_cases'):
-    st.markdown("---"); st.subheader("🆘 FIX ")
+    st.markdown("---"); st.subheader("🆘 AI Fixer")
     hint = st.text_input("Gợi ý:")
-    if st.button(" SỬA ĐI ", type="primary"):
+    if st.button("🤖 Sửa lỗi", type="primary"):
         p = f"""
         Role: Expert C++ Debugger.
         Context:
@@ -555,19 +467,3 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
