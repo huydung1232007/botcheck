@@ -10,13 +10,78 @@ import math
 from PIL import Image
 import io
 
-# --- 1. CẤU HÌNH TRANG ---
+# --- 1. CẤU HÌNH TRANG (PHẢI ĐỂ ĐẦU TIÊN) ---
 st.set_page_config(
     page_title="Ultimate Code Judge",
     layout="wide",
     page_icon="⚡",
     initial_sidebar_state="collapsed"
 )
+
+# ==============================================================================
+# 🔐 CẤU HÌNH HỆ THỐNG LOGIN 🔐
+# ==============================================================================
+# Bác sửa tài khoản / mật khẩu ở đây nhé
+USERS = {
+    "admin": st.secrets.get("PASS_ADMIN", "linhtran"), 
+    "dungdev": st.secrets.get("PASS_DUNG", "130707"),
+    "guest": st.secrets.get("PASS_GUEST", "1")
+}
+USER_LIMITS = {
+    "admin": 9999, 
+    "dungdev": 50,
+    "guest": 5
+}
+
+def check_login():
+    st.markdown("""
+    <style>
+        .login-container {
+            margin-top: 100px;
+            padding: 40px;
+            background-color: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 15px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .title {
+            font-size: 3em; font-weight: 900; margin-bottom: 20px;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c2:
+        st.markdown('<div class="title">ULTIMATE CODE JUDGE</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.subheader("🔒 Đăng nhập hệ thống")
+            username = st.text_input("Tài khoản")
+            password = st.text_input("Mật khẩu", type="password")
+            
+            if st.button("🚀 Truy cập ngay", type="primary", use_container_width=True):
+                if username in USERS and USERS[username] == password:
+                    st.session_state['logged_in'] = True
+                    st.session_state['username'] = username
+                    st.toast("Đăng nhập thành công!", icon="✅")
+                    time.sleep(0.5)
+                    st.rerun()
+                else:
+                    st.error("Sai tài khoản hoặc mật khẩu!")
+
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
+
+# NẾU CHƯA ĐĂNG NHẬP -> DỪNG CODE TẠI ĐÂY
+if not st.session_state['logged_in']:
+    check_login()
+    st.stop() # Dừng không chạy phần dưới
+
+# ==============================================================================
+# 👇👇👇 TỪ ĐÂY TRỞ XUỐNG LÀ CODE CHÍNH CỦA APP 👇👇👇
+# ==============================================================================
 
 # --- 2. CSS MAGIC (GIAO DIỆN) ---
 st.markdown("""
@@ -77,9 +142,9 @@ try:
     if "GEMINI_KEYS" in st.secrets:
         API_KEYS = st.secrets["GEMINI_KEYS"]
     else:
-        API_KEYS = [""]
+        API_KEYS = ["AIzaSyCmcoftGYbQIYo7itPnUyoJQscOSVHgvYI", "AIzaSyDFrOOQAyUFqENMyVoZ8gEeis_-9VYpxDw"]
 except FileNotFoundError:
-    API_KEYS = [""]
+    API_KEYS = ["AIzaSyCmcoftGYbQIYo7itPnUyoJQscOSVHgvYI", "AIzaSyDFrOOQAyUFqENMyVoZ8gEeis_-9VYpxDw"]
 # ==============================================================================
 
 def get_random_key():
@@ -202,6 +267,13 @@ def on_click_solve():
 
 # --- 6. SIDEBAR ---
 with st.sidebar:
+    # --- THÊM NÚT ĐĂNG XUẤT ---
+    st.write(f"👤 Xin chào, **{st.session_state.get('username', 'User')}**!")
+    if st.button("🚪 Đăng xuất", use_container_width=True):
+        st.session_state['logged_in'] = False
+        st.rerun()
+        
+    st.markdown("---")
     st.markdown("### ⚙️ Cấu hình")
     with st.container(border=True):
         num_tests = st.slider("Số lượng Test:", 10, 500, 50)
@@ -217,7 +289,7 @@ with st.sidebar:
 
     st.write("---") 
     
-    # CHATBOT (VIỆT HÓA 100%)
+    # CHATBOT
     with st.popover("💬 Trợ lý ảo (Click để chat)", use_container_width=True):
         st.markdown("### 🤖 Trợ lý Lập trình")
         messages_container = st.container(height=300)
@@ -243,17 +315,7 @@ with st.sidebar:
             curr_prob = st.session_state.get('problem_text_input', "")
             curr_code = st.session_state.get('cpp_code_content', "")
             curr_ref = st.session_state.get('reference_code', "")
-            
-            # --- PROMPT VIỆT HÓA ---
-            full_prompt = f"""
-            Role: C++ Tutor (Vietnamese Speaker).
-            CONTEXT:
-            1. PROBLEM: {curr_prob}
-            2. USER CODE: {curr_code}
-            3. REFERENCE CODE: {curr_ref}
-            USER QUESTION: {prompt}
-            INSTRUCTION: Answer strictly in VIETNAMESE (Tiếng Việt). Explain clearly.
-            """
+            full_prompt = f"Role: C++ Tutor. Context: Problem: {curr_prob}. Code: {curr_code}. Ref Code: {curr_ref}. User: {prompt}. Answer in VN."
             
             with messages_container:
                 with st.chat_message("assistant"):
@@ -312,7 +374,7 @@ with st.container(border=True):
         status = st.session_state.get('logic_status', 'Chưa khởi tạo')
         st.markdown(f"<div style='text-align: right; padding-top: 10px; opacity: 0.7;'>Status: <b>{status}</b></div>", unsafe_allow_html=True)
 
-# --- STREAMING SOLUTION (VIỆT HÓA) ---
+# --- STREAMING SOLUTION ---
 if st.session_state.get('show_solution_stream'):
     st.info("💡 **AI đang viết code mẫu...**")
     sol_text = st.session_state.get('problem_text_input', "")
@@ -320,7 +382,6 @@ if st.session_state.get('show_solution_stream'):
     
     refine_req = st.session_state.get('refine_request', "")
     
-    # --- PROMPT VIỆT HÓA ---
     if refine_req:
         prompt_sol = f"""
         Role: CP Expert (Vietnamese). 
@@ -446,7 +507,6 @@ with tab2:
 # === TAB 3: PHÂN TÍCH (VIỆT HÓA) ===
 with tab3:
     if st.button("🔍 Phân tích Độ phức tạp"):
-        # --- PROMPT VIỆT HÓA ---
         prompt = f"Analyze Big-O complexity briefly in VIETNAMESE:\n{st.session_state['cpp_code_content']}"
         cont = st.empty(); full=""
         for ch in stream_ai_response(prompt): full+=ch; cont.markdown(full)
@@ -492,54 +552,32 @@ with tab4:
                     st.graphviz_chart(dot_code.replace("```dot", "").replace("```", "").strip())
                 except: st.error("Lỗi hiển thị.")
 
-    # 2. XỬ LÝ REVIEW CODE (ĐÃ SỬA LỖI LẶP)
-    # 2. XỬ LÝ REVIEW CODE (GIAO DIỆN ĐẸP + KHÔNG LẶP)
+    # 2. XỬ LÝ REVIEW CODE (VIỆT HÓA)
     if btn_review:
         st.markdown("---")
         if not st.session_state['cpp_code_content']:
             st.warning("Thiếu code!")
         else:
             with st.spinner("🧐 Đang soi code..."):
-                # 👇👇👇 PROMPT NÂNG CẤP GIAO DIỆN 👇👇👇
                 prompt_rev = f"""
                 Role: Senior C++ Developer.
-                Task: Review code strictly in VIETNAMESE.
-                
-                REQUIREMENTS:
-                - Use clear Markdown formatting.
-                - Use Emojis (✅, ⚠️, 💡, 🚀) for bullet points.
-                - Add horizontal rules (---) to separate sections.
-                - NO conversational filler.
+                Task: Review this code strictly in VIETNAMESE (Tiếng Việt).
                 
                 Code:
                 {st.session_state['cpp_code_content']}
                 
-                OUTPUT FORMAT:
-                ## 📊 KẾT QUẢ ĐÁNH GIÁ: [Điểm số]/100
-                
-                ### ✅ Ưu điểm
-                - (Liệt kê...)
-                
-                ### ⚠️ Vấn đề & Rủi ro
-                - (Liệt kê...)
-                
-                ### 💡 Đề xuất tối ưu
-                (Giải thích ngắn gọn...)
-                
-                ### 🚀 Code mẫu (Clean Code)
-                ```cpp
-                // Code đã sửa
-                ```
+                Output Format:
+                1. **Điểm số:** .../100
+                2. **Nhận xét:** (Ưu/Nhược điểm).
+                3. **Vấn đề:** (Lỗi tiềm ẩn).
+                4. **Code Tối ưu:** (Viết lại code sạch đẹp hơn).
                 """
-                
-                # Tạo container có viền để làm nổi bật phần Review
                 cont_rev = st.container(border=True)
                 review_placeholder = cont_rev.empty()
-                
                 full_rev = ""
                 for chunk in stream_ai_response(prompt_rev):
-                    full_rev += chunk
-                    review_placeholder.markdown(full_rev)
+                    full_rev += chunk; review_placeholder.markdown(full_rev)
+
     # 3. XỬ LÝ CHUYỂN ĐỔI NGÔN NGỮ (VIỆT HÓA)
     if btn_convert:
         st.markdown("---")
@@ -620,4 +658,3 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
-
