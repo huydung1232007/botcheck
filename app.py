@@ -328,14 +328,14 @@ with st.sidebar:
             st.session_state.chat_history.append({"role": "assistant", "content": full_res})
 
 # --- 7. GIAO DIỆN CHÍNH ---
-st.markdown("<div class='gradient-text'>ULTIMATE CODE JUDGE</div>", unsafe_allow_html=True)
+st.markdown("<div class='gradient-text'> BOT CODE SỐ 1 HCMUT </div>", unsafe_allow_html=True)
 
 # Ticker
 st.markdown("""
 <div class="ticker-wrap">
     <div class="ticker">
         <div class="ticker-item">🚀 SYSTEM MODEL: dungGPT </div>
-        <div class="ticker-item">⚡ Yêu Linh Trần </div>
+        <div class="ticker-item">⚡ Yêu DEV </div>
         <div class="ticker-item">🛡️ STATUS: Online</div>
         <div class="ticker-item">🤖 DEV: Nguyen Huy Dung</div>
         <div class="ticker-item">🔥 KEEP CODING - STAY FOCUSED</div>
@@ -507,6 +507,7 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
