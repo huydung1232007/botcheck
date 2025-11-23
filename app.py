@@ -152,6 +152,11 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = [{"role": "assistant", "content": "Chào Sếp! Cần hỗ trợ gì về C++ không ạ?"}]
 if 'current_image' not in st.session_state: st.session_state['current_image'] = None
 if 'problem_text_input' not in st.session_state: st.session_state['problem_text_input'] = ""
+    # ... các dòng if cũ ...
+if 'chat_pasted_image' not in st.session_state: st.session_state['chat_pasted_image'] = None
+
+# 👇 THÊM DÒNG NÀY VÀO 👇
+if 'refine_request' not in st.session_state: st.session_state['refine_request'] = ""
 
 # --- 4. HÀM XỬ LÝ AI ---
 def configure_ai():
@@ -388,15 +393,36 @@ if st.session_state.get('show_solution_stream'):
     st.info("💡 **AI đang viết code mẫu...**")
     sol_text = st.session_state.get('problem_text_input', "")
     sol_img = st.session_state.get('current_image')
-    prompt_sol = f"Role: CP Expert. Solve C++: {sol_text}. Optimize O2. Code only."
     
-    container = st.empty(); full_res = ""
+    # 👇👇👇 THAY THẾ ĐOẠN PROMPT CŨ BẰNG ĐOẠN NÀY 👇👇👇
+    # Kiểm tra xem có yêu cầu sửa code không
+    refine_req = st.session_state.get('refine_request', "")
+    
+    if refine_req:
+        # Prompt nếu có yêu cầu sửa
+        prompt_sol = f"""
+        Role: CP Expert. 
+        Task: REWRITE the solution for this C++ problem.
+        Problem: {sol_text}
+        USER REQUIREMENT: {refine_req}
+        Rules: Optimize O2. Commented. Code only.
+        """
+    else:
+        # Prompt mặc định (như cũ)
+        prompt_sol = f"Role: CP Expert. Solve C++: {sol_text}. Optimize O2. Code only."
+    # 👆👆👆 HẾT PHẦN THAY THẾ 👆👆👆
+    
+    container = st.empty()
+    full_res = ""
     for chunk in stream_ai_response(prompt_sol, image=sol_img):
         full_res += chunk
         container.code(full_res.replace("```cpp","").replace("```",""), language='cpp')
     
-    st.session_state['reference_code'] = full_res.replace("```cpp","").replace("```","").strip()
+   st.session_state['reference_code'] = full_res.replace("```cpp","").replace("```","").strip()
     st.session_state['show_solution_stream'] = False
+    
+    # 👇 THÊM DÒNG NÀY ĐỂ RESET YÊU CẦU SAU KHI VIẾT XONG 👇
+    st.session_state['refine_request'] = "" 
     st.rerun()
 
 if st.session_state['reference_code'] and not st.session_state.get('show_solution_stream'):
@@ -555,6 +581,7 @@ if st.session_state.get('failed_cases'):
 if st.session_state.get('ai_fix_result'):
     with st.expander("✅ Kết quả sửa lỗi", expanded=True):
         st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
