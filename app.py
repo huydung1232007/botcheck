@@ -177,32 +177,24 @@ st.markdown("""
     .stApp { background-color: #050509; color: #e0e0e0; font-family: 'Inter', sans-serif; }
     
     .neon-title {
-        font-family: 'Orbitron', sans-serif; /* Font điện tử */
-        font-size: 3.8rem; 
+        font-family: 'Orbitron', sans-serif; 
+        font-size: 3.5rem; 
         font-weight: 900;
         text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 3px; /* Giãn chữ ra cho sang */
         
-        /* Màu Gradient Tím - Xanh Neon */
-        background: linear-gradient(90deg, #ff00cc, #3333ff); 
+        /* 1. Đặt màu chữ là TRẮNG */
+        color: #FFFFFF;
+        background: none; /* Bỏ màu gradient cũ đi */
+        -webkit-text-fill-color: #FFFFFF; /* Đảm bảo chữ hiện màu trắng */
         
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        
-        /* 👇 2. SỬA MÀU PHÁT SÁNG Ở ĐÂY (Chỉnh lại mã màu rgba cho khớp) */
-        text-shadow: 0 0 20px rgba(255, 0, 204, 0.5); 
-        
-        margin-bottom: 0px;
-        
-        /* Đổ bóng phát sáng (Glow) */
-        filter: drop-shadow(0 0 5px rgba(255, 0, 204, 0.8)) 
-                drop-shadow(0 0 20px rgba(51, 51, 255, 0.6));
+        /* 2. Giảm độ lóa (Glow) */
+        /* Giảm số px xuống (10px) và giảm độ mờ (0.3) để bớt chói */
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         
         margin-top: 10px;
-        margin-bottom: 30px; /* Đẩy xa thanh bên dưới ra */
+        margin-bottom: 20px;
+        padding-bottom: 10px;
     }
-
     /* --- 2. THANH TRẠNG THÁI (KHÔNG DÙNG ANIMATION TRƯỢT NỮA) --- */
     .status-bar {
         width: 100%;
@@ -567,6 +559,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
