@@ -258,9 +258,9 @@ st.markdown("""
     div[data-testid="stButton"] > button[kind="secondary"] { background: linear-gradient(45deg, #00c6ff, #0072ff); color: black; }
     
     /* TICKER */
-    .ticker-wrap { width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 0, 204, 0.3); box-shadow: 0 0 10px rgba(255, 0, 204, 0.1); overflow: hidden; height: 30px; display: flex; align-items: center; margin-bottom: 20px; }
+    .ticker-wrap { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; overflow: hidden; margin-bottom: 20px; height: 40px; display: flex; align-items: center; box-shadow: 0 0 10px rgba(0, 210, 255, 0.1); }
     .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker-scroll 30s linear infinite; }
-    .ticker-item { color: #00ffff; font-family: 'JetBrains Mono'; font-size: 0.8rem; padding: 0 2rem; }
+    .ticker-item { display: inline-block; padding: 0 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #00d2ff; text-shadow: 0 0 5px #00d2ff; }
     @keyframes ticker-scroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 </style>
 """, unsafe_allow_html=True)
@@ -323,7 +323,7 @@ with st.sidebar:
 
 # --- 7. MAIN UI ---
 # Đổi class thành 'neon-title' cho khớp với CSS
-st.markdown('<div class="neon-title">BOT CODE SỐ 1 HCMUT</div>', unsafe_allow_html=True)
+st.markdown('<div class="neon-title">BOT CODE NUMBER ONE HCMUT</div>', unsafe_allow_html=True)
 
 st.markdown("""
 <div class="ticker-wrap">
@@ -561,6 +561,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
