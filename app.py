@@ -23,9 +23,9 @@ st.set_page_config(
 # ==============================================================================
 # Bác sửa tài khoản / mật khẩu ở đây nhé
 USERS = {
-    "admin": st.secrets.get("PASS_ADMIN", "linhtran"), 
-    "dungdev": st.secrets.get("PASS_DUNG", "130707"),
-    "guest": st.secrets.get("PASS_GUEST", "1")
+    "admin": st.secrets.get("PASS_ADMIN", "dòm cái con cặc"), 
+    "dungdev": st.secrets.get("PASS_DUNG", "dòm con mẹ m"),
+    "guest": st.secrets.get("PASS_GUEST", "phải có mẹo cơ")
 }
 USER_LIMITS = {
     "admin": 9999, 
@@ -658,3 +658,4 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
+
