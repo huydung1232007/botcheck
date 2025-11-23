@@ -206,35 +206,8 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     /* --- CHỈNH SỬA TABS (TO & ĐẸP) --- */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        display: flex;        /* Dùng Flexbox */
-        width: 100%;          /* Chiếm hết chiều ngang */
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        flex-grow: 1;         /* Tự động giãn đều nhau */
-        height: 60px;         /* Tăng chiều cao lên 60px (hoặc to hơn tùy thích) */
-        background-color: #1f2937; 
-        border-radius: 8px; 
-        color: #e5e7eb;
-        font-weight: bold;    /* Chữ đậm */
-        font-size: 18px;      /* Chữ to hơn */
-        white-space: pre-wrap; /* Cho phép xuống dòng nếu cần */
-        display: flex;        /* Căn giữa nội dung */
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #374151;
-    }
-
-    /* Màu khi ĐANG CHỌN (Active) */
-    .stTabs [aria-selected="true"] {
-        background-color: #238636 !important; 
-        color: white !important;
-        border: 1px solid #4ade80; /* Thêm viền sáng cho nút đang chọn */
-        box-shadow: 0 0 15px rgba(35, 134, 54, 0.6); /* Hiệu ứng phát sáng */
-    }
-
+    .stTabs [data-baseweb="tab"] { height: 40px; background-color: #18181b; border: 1px solid #27272a; flex-grow: 1; }
+    .stTabs [aria-selected="true"] { background-color: rgba(37, 99, 235, 0.1) !important; border: 1px solid #3b82f6 !important; color: #60a5fa !important; }
     /* EDITOR & INPUT */
     .stTextArea textarea {
         font-family: 'Consolas', 'Monaco', monospace !important;
@@ -558,6 +531,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
