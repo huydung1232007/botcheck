@@ -185,9 +185,15 @@ st.markdown("""
         letter-spacing: 3px; /* Giãn chữ ra cho sang */
         
         /* Màu Gradient Tím - Xanh Neon */
-        background: linear-gradient(90deg, #ff00cc, #333399, #00ccff);
+        background: linear-gradient(90deg, #ff00cc, #3333ff); 
+        
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        
+        /* 👇 2. SỬA MÀU PHÁT SÁNG Ở ĐÂY (Chỉnh lại mã màu rgba cho khớp) */
+        text-shadow: 0 0 20px rgba(255, 0, 204, 0.5); 
+        
+        margin-bottom: 0px;
         
         /* Đổ bóng phát sáng (Glow) */
         filter: drop-shadow(0 0 5px rgba(255, 0, 204, 0.8)) 
@@ -561,6 +567,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
