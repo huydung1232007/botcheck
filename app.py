@@ -176,26 +176,7 @@ st.markdown("""
     /* TỔNG THỂ */
     .stApp { background-color: #050509; color: #e0e0e0; font-family: 'Inter', sans-serif; }
     
-    .neon-title {
-        font-family: 'Inter', sans-serif; /* Dùng font Inter cho nét chữ dày và hiện đại */
-        font-size: 4rem;                  /* Cỡ chữ to */
-        font-weight: 900;                 /* Độ đậm tối đa (Black/Ultra Bold) */
-        text-align: center;
-        text-transform: uppercase;        /* Viết hoa toàn bộ */
-        
-        /* Màu sắc: Xanh Cyan sáng (Solid) */
-        color: #33CCFF; 
-        
-        /* Tắt hết hiệu ứng màu mè cũ (Gradient, Glow) */
-        background: none;
-        -webkit-background-clip: initial;
-        -webkit-text-fill-color: #33CCFF; /* Đảm bảo màu ăn vào chữ */
-        text-shadow: none;                /* Bỏ bóng phát sáng để chữ nét và phẳng */
-        
-        margin-top: 10px;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-    }
+    .neon-title { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 3.5rem; text-align: center; }
     /* --- 2. THANH TRẠNG THÁI (KHÔNG DÙNG ANIMATION TRƯỢT NỮA) --- */
     .status-bar {
         width: 100%;
@@ -560,6 +541,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
