@@ -220,34 +220,41 @@ def extract_text_from_image(image):
     except: return None
 
 # --- 5. CALLBACK HANDLERS ---
-def handle_solve_process():
-    uploaded_img = st.session_state.get('img_uploader') 
-    if uploaded_img:
-        img_data = Image.open(uploaded_img)
-        st.session_state['current_image'] = img_data
-        with st.spinner("👁️ AI đang quét ảnh..."):
-            extracted_text = extract_text_from_image(img_data)
-            if extracted_text and "Error" not in extracted_text:
-                st.session_state['problem_text_input'] = extracted_text
-                st.toast("Đã đọc xong đề bài!", icon="📝")
+def on_click_solve():
+    """Hàm này chạy NGAY KHI bấm nút, trước khi vẽ lại giao diện"""
+    # 1. Lấy ảnh từ uploader (nếu có)
+    uploaded_file = st.session_state.get('img_uploader')
+    if uploaded_file:
+        # Mở ảnh và lưu vào session state
+        img = Image.open(uploaded_file)
+        st.session_state['current_image'] = img
+        
+        # Gọi AI đọc ảnh
+        extracted_text = extract_text_from_image(img)
+        if extracted_text and "Error" not in extracted_text:
+            # CẬP NHẬT TEXT AREA TẠI ĐÂY LÀ AN TOÀN (VÌ ĐANG TRONG CALLBACK)
+            st.session_state['problem_text_input'] = extracted_text
+            st.toast("Đã đọc xong đề bài!", icon="📝")
     
+    # 2. Lấy text (vừa update hoặc text cũ)
     final_text = st.session_state.get('problem_text_input', "")
     cur_img = st.session_state.get('current_image')
 
     if not final_text and not cur_img:
-        st.toast("Thiếu đề bài!", icon="⚠️"); return
+        st.toast("Thiếu đề bài (Text/Ảnh)!", icon="⚠️")
+        return
 
-    with st.spinner("🧠 Đang nạp đề..."):
-        nc = get_ai_test_logic(final_text if final_text else "", cur_img)
-        if nc:
-            st.session_state['python_logic'] = nc
-            st.session_state['logic_status'] = "✅ Đã hiểu đề"
-            st.session_state['failed_cases'] = []
-            st.session_state['reference_code'] = ""
-            st.session_state['ai_fix_result'] = ""
-            st.toast("Đã xong!", icon="🔥")
-        else: st.toast("Lỗi AI Logic", icon="❌")
-
+    # 3. Tạo Logic Test
+    nc = get_ai_test_logic(final_text if final_text else "", cur_img)
+    if nc:
+        st.session_state['python_logic'] = nc
+        st.session_state['logic_status'] = "✅ Đã nạp Logic"
+        st.session_state['failed_cases'] = []
+        st.session_state['reference_code'] = ""
+        st.session_state['ai_fix_result'] = ""
+        st.toast("Sẵn sàng chiến đấu!", icon="🔥")
+    else:
+        st.toast("Lỗi AI Logic", icon="❌")
 # --- 6. SIDEBAR ---
 with st.sidebar:
     st.markdown("### ⚙️ SETTINGS")
@@ -359,9 +366,12 @@ with st.container(border=True):
     b1, b2, b3 = st.columns([1, 1, 2])
     
     with b1:
-        if st.button("🚀 Gửi đề", type="primary", use_container_width=True):
-            handle_solve_process()
-            st.rerun()
+        st.button(
+            "🚀 Gửi đề", 
+            type="primary", 
+            use_container_width=True,
+            on_click=on_click_solve  # <--- QUAN TRỌNG: Gọi hàm qua on_click
+        )
             
     with b2:
         if st.button("💡 Gợi ý", type="secondary", use_container_width=True):
@@ -497,6 +507,7 @@ if st.session_state.get('ai_fix_result'):
     with st.container(border=True):
         st.info("Kết quả sửa lỗi:")
         st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
