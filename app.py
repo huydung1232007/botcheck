@@ -177,19 +177,20 @@ st.markdown("""
     .stApp { background-color: #050509; color: #e0e0e0; font-family: 'Inter', sans-serif; }
     
     .neon-title {
-        font-family: 'Orbitron', sans-serif; 
-        font-size: 3.5rem; 
-        font-weight: 900;
+        font-family: 'Inter', sans-serif; /* Dùng font Inter cho nét chữ dày và hiện đại */
+        font-size: 4rem;                  /* Cỡ chữ to */
+        font-weight: 900;                 /* Độ đậm tối đa (Black/Ultra Bold) */
         text-align: center;
+        text-transform: uppercase;        /* Viết hoa toàn bộ */
         
-        /* 1. Đặt màu chữ là TRẮNG */
-        color: #FFFFFF;
-        background: none; /* Bỏ màu gradient cũ đi */
-        -webkit-text-fill-color: #FFFFFF; /* Đảm bảo chữ hiện màu trắng */
+        /* Màu sắc: Xanh Cyan sáng (Solid) */
+        color: #33CCFF; 
         
-        /* 2. Giảm độ lóa (Glow) */
-        /* Giảm số px xuống (10px) và giảm độ mờ (0.3) để bớt chói */
-        text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        /* Tắt hết hiệu ứng màu mè cũ (Gradient, Glow) */
+        background: none;
+        -webkit-background-clip: initial;
+        -webkit-text-fill-color: #33CCFF; /* Đảm bảo màu ăn vào chữ */
+        text-shadow: none;                /* Bỏ bóng phát sáng để chữ nét và phẳng */
         
         margin-top: 10px;
         margin-bottom: 20px;
@@ -559,6 +560,7 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
 
