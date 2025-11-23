@@ -488,24 +488,72 @@ with tab3:
         cont = st.empty(); full=""
         for ch in stream_ai_response(prompt): full+=ch; cont.markdown(full)
 
-# --- 8. AI FIXER ---
+# --- 8. AI FIXER (PHIÊN BẢN PRO: CHI TIẾT & GỢI Ý) ---
 if st.session_state.get('failed_cases'):
     st.markdown("---")
-    st.subheader("🆘 FIX Debug")
-    if st.button("Sửa code", type="primary"):
-        curr_txt = st.session_state.get('problem_text_input', "")
-        prob = curr_txt if curr_txt else "Check context image"
-        prompt_fix = f"Problem: {prob}\nCode: {st.session_state['cpp_code_content']}\nErrors: {' '.join(st.session_state['failed_cases'][:3])}\nFix it & Explain briefly in Vietnamese."
-        
-        cont_fix = st.empty(); full_fix=""
-        img = st.session_state.get('current_image')
-        for ch in stream_ai_response(prompt_fix, image=img):
-            full_fix += ch; cont_fix.markdown(full_fix)
-        st.session_state['ai_fix_result'] = full_fix
-
-if st.session_state.get('ai_fix_result'):
+    st.subheader("🆘 Bố của các con")
+    
     with st.container(border=True):
-        st.info("Kết quả sửa lỗi:")
+        # 1. Cho phép người dùng nhập gợi ý để AI sửa chuẩn hơn
+        user_hint = st.text_input("💡 Bạn nghi ngờ lỗi ở đâu? (Gợi ý cho AI):", 
+                                  placeholder="Ví dụ: do ngu...")
+        
+        # 2. Tùy chọn giải thích chi tiết
+        detail_mode = st.checkbox("✅ Yêu cầu AI giải thích chi tiết nguyên nhân lỗi", value=True)
+
+        if st.button("FIX", type="primary", use_container_width=True):
+            # Lấy thông tin ngữ cảnh
+            curr_txt = st.session_state.get('problem_text_input', "")
+            prob = curr_txt if curr_txt else "Check context image"
+            
+            # Xây dựng Prompt (Câu lệnh) chi tiết hơn
+            instruction = "Explain the bug briefly."
+            if detail_mode:
+                instruction = """
+                Analyze deeply. 
+                1. Identify the EXACT cause of the error based on the failed test cases.
+                2. Point out the specific line numbers that are wrong.
+                3. Explain WHY your fix works.
+                4. Provide the FULL corrected code.
+                """
+            
+            hint_prompt = f"USER HINT: {user_hint}" if user_hint else ""
+
+            prompt_fix = f"""
+            Role: Expert C++ Debugger.
+            
+            CONTEXT:
+            - PROBLEM: {prob}
+            - CURRENT CODE:
+            {st.session_state['cpp_code_content']}
+            
+            - FAILED TEST CASES (Log):
+            {' '.join(st.session_state['failed_cases'][:3])}
+            
+            {hint_prompt}
+            
+            TASK: {instruction}
+            
+            OUTPUT FORMAT:
+            - Use Markdown for explanation.
+            - Put the corrected code inside a cpp code block.
+            - Language: VIETNAMESE.
+            """
+            
+            # Gọi AI Stream
+            fix_container = st.empty()
+            full_fix = ""
+            img = st.session_state.get('current_image')
+            
+            for ch in stream_ai_response(prompt_fix, image=img):
+                full_fix += ch
+                fix_container.markdown(full_fix)
+                
+            st.session_state['ai_fix_result'] = full_fix
+
+# Hiển thị kết quả cũ nếu có (để không bị mất khi reload)
+if st.session_state.get('ai_fix_result'):
+    with st.expander("✅ Kết quả sửa lỗi", expanded=True):
         st.markdown(st.session_state['ai_fix_result'])
 
 
