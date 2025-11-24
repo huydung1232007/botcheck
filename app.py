@@ -160,7 +160,11 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap');
     .stApp { background-color: #09090b; color: #e4e4e7; font-family: 'Inter', sans-serif; }
     .gradient-text { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 3.5rem; text-align: center; }
-    .stTextArea textarea { font-family: 'JetBrains Mono', monospace !important; background-color: #18181b !important; color: #a1a1aa !important; border: 1px solid #27272a; }
+    .stTextArea textarea {
+        font-family: 'JetBrains Mono', monospace !important; background-color: #0d1117 !important; color: #7ee787 !important;
+        border: 1px solid #30363d !important; border-radius: 8px;
+    }
+    .stTextArea textarea:focus { border-color: #ff00cc !important; box-shadow: 0 0 10px rgba(255, 0, 204, 0.3); }
     div[data-testid="stButton"] > button[kind="primary"] { background: linear-gradient(90deg, #2563eb, #3b82f6); color: white; border: none; font-weight: bold; }
     .stTabs [data-baseweb="tab"] { height: 40px; background-color: #18181b; border: 1px solid #27272a; flex-grow: 1; }
     .stTabs [aria-selected="true"] { background-color: rgba(37, 99, 235, 0.1) !important; border: 1px solid #3b82f6 !important; color: #60a5fa !important; }
@@ -467,3 +471,4 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
