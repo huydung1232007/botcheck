@@ -83,7 +83,7 @@ def stream_ai_response(prompt, image=None):
 def extract_text_from_image(image):
     if not configure_ai(): return None
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         res = model.generate_content(["Extract text exactly.", image])
         return res.text.strip()
     except: return None
@@ -91,7 +91,7 @@ def extract_text_from_image(image):
 def get_ai_test_logic(problem, image=None):
     if not configure_ai(): return None
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         prompt = f"""
         Role: Senior QA. Task: Write Python test generator for: {problem}.
         
@@ -483,5 +483,6 @@ if st.session_state.get('failed_cases'):
         f = st.write_stream(stream_ai_response(p))
         st.session_state['ai_fix_result'] = f
     if st.session_state.get('ai_fix_result'): st.markdown(st.session_state['ai_fix_result'])
+
 
 
